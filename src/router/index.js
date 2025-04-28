@@ -1,4 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
+
+import MainLayout from '../layouts/MainLayout.vue';
+import AuthLayout from '../layouts/AuthLayout.vue';
+
 import LoginPage from '../pages/LoginPage.vue';
 import DashboardPage from '../pages/DashboardPage.vue';
 import UsersPage from '../pages/UsersPage.vue';
@@ -7,8 +11,6 @@ import RolesPage from '../pages/RolesPage.vue';
 import UserRolesPage from '../pages/UserRolesPage.vue';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage.vue';
 import ResetPasswordPage from '../pages/ResetPasswordPage.vue';
-import MainLayout from '../layouts/MainLayout.vue';
-import AuthLayout from '../layouts/AuthLayout.vue';
 
 const routes = [
     {
