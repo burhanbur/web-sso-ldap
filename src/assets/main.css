@@ -1,0 +1,18 @@
+@import './base.css';
+
+#app {
+  width: 100%;
+  min-height: 100vh;
+  font-weight: normal;
+}
+
+a {
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Remove the default Vue.js media queries that were constraining the layout */
