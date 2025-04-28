@@ -32,7 +32,7 @@ Before you begin, ensure you have installed:
 
 1. Clone the repository:
 ```sh
-git clone [your-repository-url]
+git clone https://github.com/burhanbur/web-sso-ldap.git
 cd sso-frontend
 ```
 
