@@ -7,8 +7,8 @@ import RolesPage from '../pages/RolesPage.vue';
 import UserRolesPage from '../pages/UserRolesPage.vue';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage.vue';
 import ResetPasswordPage from '../pages/ResetPasswordPage.vue';
+import MainLayout from '../layouts/MainLayout.vue';
 import AuthLayout from '../layouts/AuthLayout.vue';
-import PublicLayout from '../layouts/PublicLayout.vue';
 
 const routes = [
     {
@@ -17,31 +17,29 @@ const routes = [
     },
     {
         path: '/',
-        component: PublicLayout,
+        component: AuthLayout,
         children: [
             {
                 path: 'login',
                 name: 'login',
                 component: LoginPage,
-                meta: { requiresGuest: true }
             },
             {
                 path: 'forgot-password',
                 name: 'forgot-password',
                 component: ForgotPasswordPage,
-                meta: { requiresGuest: true }
             },
             {
                 path: 'reset-password',
                 name: 'reset-password',
                 component: ResetPasswordPage,
-                meta: { requiresGuest: true }
             }
-        ]
+        ],
+        meta: { requiresGuest: true }
     },
     {
         path: '/',
-        component: AuthLayout,
+        component: MainLayout,
         children: [
             {
                 path: 'dashboard',
