@@ -4,28 +4,31 @@
             <div class="header-content">
                 <div class="brand">
                     <img src="../assets/logo.png" alt="Logo" class="logo" />
-                    <span class="brand-text">UPER IDP</span>
+                    <span class="brand-text">CENTRAL</span>
                 </div>
-                <nav class="nav-menu">
+                <button class="hamburger-btn" @click="toggleMenu" aria-label="Toggle menu">
+                    <font-awesome-icon :icon="isMenuOpen ? 'times' : 'bars'" />
+                </button>
+                <nav class="nav-menu" :class="{ 'nav-menu-open': isMenuOpen }">
                     <router-link to="/dashboard" class="nav-item" active-class="active">
                         <font-awesome-icon icon="home" />
-                        <span>Dashboard</span>
+                        <span>Dasbor</span>
                     </router-link>
                     <router-link to="/users" class="nav-item" active-class="active">
                         <font-awesome-icon icon="users" />
-                        <span>Users</span>
+                        <span>Pengguna</span>
                     </router-link>
                     <router-link to="/applications" class="nav-item" active-class="active">
                         <font-awesome-icon icon="window-restore" />
-                        <span>Applications</span>
+                        <span>Aplikasi Klien</span>
                     </router-link>
                     <router-link to="/roles" class="nav-item" active-class="active">
                         <font-awesome-icon icon="user-shield" />
-                        <span>Roles</span>
+                        <span>Peran</span>
                     </router-link>
                     <router-link to="/user-roles" class="nav-item" active-class="active">
                         <font-awesome-icon icon="user-tag" />
-                        <span>User Roles</span>
+                        <span>Peran Pengguna</span>
                     </router-link>
                 </nav>
                 <div class="user-menu">
@@ -52,12 +55,18 @@
 <script setup>
     import { useRouter } from 'vue-router';
     import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+    import { ref } from 'vue';
 
     const router = useRouter();
+    const isMenuOpen = ref(false);
 
     const logout = () => {
         localStorage.removeItem('access_token');
         router.push('/login');
+    };
+
+    const toggleMenu = () => {
+        isMenuOpen.value = !isMenuOpen.value;
     };
 </script>
 
@@ -174,13 +183,64 @@
         opacity: 0;
     }
 
+    .hamburger-btn {
+        display: none;
+        background: none;
+        border: none;
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0.5rem;
+    }
+
     @media (max-width: 768px) {
         .header {
             padding: 0 1rem;
         }
 
+        .header-content {
+            position: relative;
+        }
+
+        .hamburger-btn {
+            display: block;
+            order: 1;
+        }
+
+        .brand {
+            order: 0;
+        }
+
         .nav-menu {
-            display: none;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            background-color: var(--surface);
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            transform: translateY(-100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            visibility: hidden;
+        }
+
+        .nav-menu.nav-menu-open {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .nav-item {
+            width: 100%;
+            padding: 1rem;
+        }
+
+        .user-menu {
+            order: 2;
+            margin-left: auto;
         }
 
         .main-content {

@@ -1,30 +1,36 @@
 <template>
     <div class="dashboard">
-        <h1>Dashboard</h1>
-        
-        <section class="applications-section">
-            <h2>Applications</h2>
-            <div v-if="loadingApps" class="loading">Loading applications...</div>
-            <div v-else class="applications-grid">
-                <div v-for="app in applications" :key="app.id" class="app-card">
-                    <h3>{{ app.name }}</h3>
-                    <p>{{ app.description }}</p>
-                </div>
+      <header class="dashboard-header">
+        <h2>📊 Selamat datang di Central Authentication Universitas Pertamina</h2>
+      </header>
+  
+      <section class="dashboard-section">
+        <h2>🚀 Aplikasi Klien</h2>
+        <div v-if="loadingApps" class="loading">Loading applications...</div>
+        <div v-else class="applications-grid">
+          <div v-for="app in applications" :key="app.id" class="app-card">
+            <h3>
+              <router-link :to="`/applications/${app.id}`">{{ app.name }}</router-link>
+            </h3>
+            <p>{{ app.description }}</p>
+          </div>
+        </div>
+      </section>
+  
+      <section class="dashboard-section">
+        <h2>🧑‍💻 Pengguna Terbaru</h2>
+        <div v-if="loadingUsers" class="loading">Loading users...</div>
+        <div v-else class="users-list">
+          <div v-for="user in latestUsers" :key="user.id" class="user-item">
+            <div class="user-info">
+              <span class="user-name">{{ user.full_name }}</span>
+              <span class="user-email">{{ user.email }}</span>
             </div>
-        </section>
-
-        <section class="users-section">
-            <h2>Latest Users</h2>
-            <div v-if="loadingUsers" class="loading">Loading users...</div>
-            <div v-else class="users-list">
-                <div v-for="user in latestUsers" :key="user.id" class="user-item">
-                    <span>{{ user.full_name }}</span>
-                    <span class="user-email">{{ user.email }}</span>
-                </div>
-            </div>
-        </section>
+          </div>
+        </div>
+      </section>
     </div>
-</template>
+  </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
@@ -67,45 +73,108 @@ onMounted(() => {
 
 <style scoped>
 .dashboard {
-    padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  font-family: 'Inter', sans-serif;
+  color: #333;
 }
 
-.applications-section,
-.users-section {
-    margin-bottom: 2rem;
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.dashboard-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-header p {
+  font-size: 1rem;
+  color: #666;
+}
+
+.dashboard-section {
+  margin-bottom: 3rem;
+}
+
+.dashboard-section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #222;
 }
 
 .applications-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
 }
 
 .app-card {
-    padding: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.app-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.app-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.app-card p {
+  color: #666;
+  font-size: 0.95rem;
 }
 
 .users-list {
-    margin-top: 1rem;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .user-item {
-    padding: 0.5rem;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  background: #fafafa;
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.user-item:hover {
+  background: #f0f0f0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 1rem;
 }
 
 .user-email {
-    color: #666;
+  font-size: 0.85rem;
+  color: #888;
 }
 
 .loading {
-    padding: 1rem;
-    color: #666;
+  text-align: center;
+  padding: 2rem;
+  font-size: 1rem;
+  color: #777;
 }
 </style>

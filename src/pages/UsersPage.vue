@@ -1,104 +1,76 @@
 <template>
     <div class="users-page">
-        <h1>User Management</h1>
-        
-        <div class="actions">
-            <button @click="showCreateModal = true" class="create-btn">
-                Create New User
+      <div class="header">
+        <h1>Manajemen Pengguna</h1>
+        <button @click="showCreateModal = true" class="primary-btn">
+          + Tambah Pengguna
+        </button>
+      </div>
+  
+      <div v-if="loading" class="loading">Loading users...</div>
+  
+      <div v-else class="users-grid">
+        <div v-for="user in users" :key="user.id" class="user-card">
+          <div class="user-top">
+            <img :src="user.avatar || defaultAvatar" :alt="user.full_name" class="avatar" />
+            <div class="user-info">
+              <h3>{{ user.full_name }}</h3>
+              <p class="email">{{ user.email }}</p>
+              <div class="roles">
+                <span v-for="role in user.roles" :key="role.id" class="role-badge">
+                  {{ role.name }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="user-actions">
+            <button @click="editUser(user)" class="action-btn edit">
+              <font-awesome-icon icon="edit" />
             </button>
+            <button @click="deleteUser(user.id)" class="action-btn delete">
+              <font-awesome-icon icon="trash" />
+            </button>
+          </div>
         </div>
-
-        <div class="users-container">
-            <div v-if="loading" class="loading">Loading users...</div>
-            <div v-else class="users-grid">
-                <div v-for="user in users" :key="user.id" class="user-card">
-                    <div class="user-avatar">
-                        <img :src="user.avatar || defaultAvatar" :alt="user.full_name" />
-                    </div>
-                    <div class="user-info">
-                        <h3>{{ user.full_name }}</h3>
-                        <p class="user-email">{{ user.email }}</p>
-                        <div class="user-roles">
-                            <span v-for="role in user.roles" :key="role.id" class="role-badge">
-                                {{ role.name }}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="user-actions">
-                        <button @click="editUser(user)" class="edit-btn">
-                            <font-awesome-icon icon="edit" />
-                        </button>
-                        <button @click="deleteUser(user.id)" class="delete-btn">
-                            <font-awesome-icon icon="trash" />
-                        </button>
-                    </div>
+      </div>
+  
+      <!-- Modal -->
+      <div v-if="showModal" class="modal-overlay">
+        <div class="modal">
+          <h2>{{ isEditing ? 'Edit User' : 'Create New User' }}</h2>
+          <form @submit.prevent="handleSubmit" class="modal-form">
+            <div class="form-group">
+              <label for="full_name">Full Name</label>
+              <input type="text" id="full_name" v-model="formData.full_name" required />
+            </div>
+  
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" v-model="formData.email" required />
+            </div>
+  
+            <div class="form-group">
+              <label for="password">{{ isEditing ? 'New Password (Optional)' : 'Password' }}</label>
+              <input type="password" id="password" v-model="formData.password" :required="!isEditing" />
+            </div>
+  
+            <div class="form-group">
+              <label>Roles</label>
+              <div class="roles-checkboxes">
+                <div v-for="role in availableRoles" :key="role.id" class="checkbox-item">
+                  <input type="checkbox" :id="'role-' + role.id" v-model="formData.roles" :value="role.id" />
+                  <label :for="'role-' + role.id">{{ role.name }}</label>
                 </div>
+              </div>
             </div>
-        </div>
-
-        <!-- Create/Edit Modal -->
-        <div v-if="showModal" class="modal">
-            <div class="modal-content">
-                <h2>{{ isEditing ? 'Edit User' : 'Create New User' }}</h2>
-                <form @submit.prevent="handleSubmit">
-                    <div class="form-group">
-                        <label for="full_name">Full Name</label>
-                        <input
-                            type="text"
-                            id="full_name"
-                            v-model="formData.full_name"
-                            required
-                        />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input
-                            type="email"
-                            id="email"
-                            v-model="formData.email"
-                            required
-                        />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password">
-                            {{ isEditing ? 'New Password (leave blank to keep current)' : 'Password' }}
-                        </label>
-                        <input
-                            type="password"
-                            id="password"
-                            v-model="formData.password"
-                            :required="!isEditing"
-                        />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Roles</label>
-                        <div class="roles-list">
-                            <div v-for="role in availableRoles" :key="role.id" class="role-item">
-                                <input
-                                    type="checkbox"
-                                    :id="'role-' + role.id"
-                                    v-model="formData.roles"
-                                    :value="role.id"
-                                />
-                                <label :for="'role-' + role.id">{{ role.name }}</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-actions">
-                        <button type="button" @click="closeModal" class="cancel-btn">
-                            Cancel
-                        </button>
-                        <button type="submit" class="submit-btn">
-                            {{ isEditing ? 'Update' : 'Create' }}
-                        </button>
-                    </div>
-                </form>
+  
+            <div class="modal-actions">
+              <button type="button" @click="closeModal" class="secondary-btn">Cancel</button>
+              <button type="submit" class="primary-btn">{{ isEditing ? 'Update' : 'Create' }}</button>
             </div>
+          </form>
         </div>
+      </div>
     </div>
 </template>
 
@@ -194,183 +166,207 @@
 </script>
 
 <style scoped>
-    .users-page {
-        padding: 2rem;
-    }
+/* Layout */
+.users-page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: auto;
+}
 
-    .actions {
-        margin: 2rem 0;
-    }
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
 
-    .create-btn {
-        padding: 0.5rem 1rem;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
+/* Button */
+.primary-btn, .secondary-btn {
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
 
-    .users-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 2rem;
-    }
+.primary-btn {
+  background-color: #4CAF50;
+  color: white;
+}
 
-    .user-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        display: flex;
-        align-items: flex-start;
-    }
+.primary-btn:hover {
+  background-color: #45A049;
+}
 
-    .user-avatar {
-        width: 60px;
-        height: 60px;
-        margin-right: 1rem;
-    }
+.secondary-btn {
+  background-color: #ddd;
+  color: #333;
+}
 
-    .user-avatar img {
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        object-fit: cover;
-    }
+.secondary-btn:hover {
+  background-color: #ccc;
+}
 
-    .user-info {
-        flex: 1;
-    }
+/* Users grid */
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
 
-    .user-email {
-        color: #666;
-        margin: 0.5rem 0;
-    }
+/* Card */
+.user-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
 
-    .user-roles {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-    }
+.user-top {
+  display: flex;
+  gap: 1rem;
+}
 
-    .role-badge {
-        background-color: #e9ecef;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.875rem;
-        color: #666;
-    }
+.avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f0f0f0;
+}
 
-    .user-actions {
-        display: flex;
-        gap: 0.5rem;
-    }
+.user-info h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
 
-    .edit-btn,
-    .delete-btn {
-        padding: 0.25rem 0.5rem;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
+.email {
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 0.2rem;
+}
 
-    .edit-btn {
-        background-color: #2196F3;
-        color: white;
-    }
+.roles {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
 
-    .delete-btn {
-        background-color: #f44336;
-        color: white;
-    }
+.role-badge {
+  background-color: #e9f5ff;
+  color: #0366d6;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
 
-    .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+/* Actions */
+.user-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
 
-    .modal-content {
-        background: white;
-        padding: 2rem;
-        border-radius: 8px;
-        width: 100%;
-        max-width: 500px;
-        max-height: 90vh;
-        overflow-y: auto;
-    }
+.action-btn {
+  padding: 0.4rem 0.6rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
 
-    .form-group {
-        margin-bottom: 1rem;
-    }
+.action-btn.edit {
+  background-color: #2196F3;
+  color: white;
+}
 
-    .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-    }
+.action-btn.delete {
+  background-color: #f44336;
+  color: white;
+}
 
-    .form-group input[type="text"],
-    .form-group input[type="email"],
-    .form-group input[type="password"] {
-        width: 100%;
-        padding: 0.5rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+}
 
-    .roles-list {
-        max-height: 200px;
-        overflow-y: auto;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 0.5rem;
-    }
+.modal {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 500px;
+  animation: scaleIn 0.3s ease;
+}
 
-    .role-item {
-        display: flex;
-        align-items: center;
-        padding: 0.25rem 0;
-    }
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
 
-    .role-item input[type="checkbox"] {
-        margin-right: 0.5rem;
-    }
+@keyframes scaleIn {
+  from { transform: scale(0.95); } to { transform: scale(1); }
+}
 
-    .modal-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 1rem;
-        margin-top: 2rem;
-    }
+/* Form */
+.modal-form {
+  margin-top: 1rem;
+}
 
-    .cancel-btn,
-    .submit-btn {
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
+.form-group {
+  margin-bottom: 1.2rem;
+}
 
-    .cancel-btn {
-        background-color: #ddd;
-    }
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+}
 
-    .submit-btn {
-        background-color: #4CAF50;
-        color: white;
-    }
+.form-group input {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
 
-    .loading {
-        text-align: center;
-        color: #666;
-        padding: 2rem;
-    }
+.roles-checkboxes {
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.5rem;
+  background: #f9f9f9;
+}
+
+.checkbox-item {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-item input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+}
 </style>

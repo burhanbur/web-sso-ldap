@@ -7,7 +7,11 @@ import {
   faUserTag,
   faSignOutAlt,
   faEye,
-  faEyeSlash
+  faEyeSlash,
+  faBars,
+  faEdit,
+  faTrash,
+  faTimes
 } from '@fortawesome/free-solid-svg-icons';
 
 // Add icons to the library
@@ -19,5 +23,9 @@ library.add(
   faUserTag,
   faSignOutAlt,
   faEye,
-  faEyeSlash
+  faEyeSlash,
+  faBars,
+  faEdit,
+  faTrash,
+  faTimes
 );
