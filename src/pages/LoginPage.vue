@@ -83,10 +83,14 @@
         try {
             loading.value = true;
             const response = await authService.login(username.value, password.value);
+
+            if (!response.data.access_token) {
+                throw new Error('Login failed');
+            }
+
             localStorage.setItem('access_token', response.data.access_token);
             router.push('/dashboard');
         } catch (error) {
-            console.error('Login failed:', error);
             errorMsg.value = error.response?.data?.message || 'Invalid username or password';
         } finally {
             loading.value = false;

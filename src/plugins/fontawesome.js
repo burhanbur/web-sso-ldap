@@ -11,6 +11,12 @@ import {
   faBars,
   faEdit,
   faTrash,
+  faBan,
+  faCheck,
+  faPlus,
+  faUserPlus,
+  faChevronLeft,
+  faChevronRight,
   faTimes
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -27,5 +33,11 @@ library.add(
   faBars,
   faEdit,
   faTrash,
+  faBan,
+  faCheck,
+  faPlus,
+  faUserPlus,
+  faChevronLeft,
+  faChevronRight,
   faTimes
 );

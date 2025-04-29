@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { authService } from './services/authService';
+import { useRouter } from 'vue-router';
 import { jwtDecode } from 'jwt-decode';
 
 const api = axios.create({
@@ -11,6 +12,7 @@ const api = axios.create({
 });
 
 // Activity tracking
+const router = useRouter();
 let lastActivity = Date.now();
 const INACTIVITY_TIMEOUT = 60 * 60 * 1000; // 60 minutes in milliseconds
 const TOKEN_REFRESH_THRESHOLD = 1 * 60; // Refresh token 5 minutes before expiry
@@ -61,7 +63,7 @@ const handleTokenRefresh = async () => {
             .catch(error => {
                 if (error.response?.status === 401) {
                     localStorage.removeItem('access_token');
-                    window.location.href = '/login';
+                    router.push('/login');
                 }
                 throw error;
             })
@@ -98,7 +100,7 @@ const shouldRefreshToken = () => {
 setInterval(() => {
     if (Date.now() - lastActivity > INACTIVITY_TIMEOUT) {
         localStorage.removeItem('access_token');
-        window.location.href = '/login';
+        router.push('/login');
     }
 }, 60000);
 

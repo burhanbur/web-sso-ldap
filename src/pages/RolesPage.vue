@@ -1,91 +1,86 @@
 <template>
     <div class="roles-page">
-        <h1>Role Management</h1>
-        
-        <div class="actions">
-            <button @click="showCreateModal = true" class="create-btn">
-                Create New Role
+      <div class="header">
+        <h1>Manajemen Peran</h1>
+        <button @click="showModal = true" class="primary-btn">
+          + Tambah Peran
+        </button>
+      </div>
+  
+      <div v-if="loading" class="loading">Loading roles...</div>
+  
+      <div v-else class="roles-grid">
+        <div v-for="role in roles" :key="role.id" class="role-card">
+          <div class="role-info">
+            <h3>{{ role.display_name }}</h3>
+            <p class="code">{{ role.name }}</p>
+            <p class="description">{{ role.description || 'No description' }}</p>
+            <div class="tags">
+              <span class="tag">{{ role.role_type?.name || 'Unknown Type' }}</span>
+              <span class="tag">{{ role.scope_type?.name || 'Unknown Scope' }}</span>
+            </div>
+          </div>
+          <div class="role-actions">
+            <button @click="editRole(role)" class="action-btn edit">
+              <font-awesome-icon icon="edit" />
             </button>
+            <button @click="deleteRole(role.uuid)" class="action-btn delete">
+              <font-awesome-icon icon="trash" />
+            </button>
+          </div>
         </div>
-
-        <div class="roles-container">
-            <div v-if="loading" class="loading">Loading roles...</div>
-            <div v-else class="roles-grid">
-                <div v-for="role in roles" :key="role.id" class="role-card">
-                    <div class="role-header">
-                        <h3>{{ role.name }}</h3>
-                        <div class="role-actions">
-                            <button @click="editRole(role)" class="edit-btn">
-                                <font-awesome-icon icon="edit" />
-                            </button>
-                            <button @click="deleteRole(role.id)" class="delete-btn">
-                                <font-awesome-icon icon="trash" />
-                            </button>
-                        </div>
-                    </div>
-                    <p class="role-description">{{ role.description }}</p>
-                    <div class="role-permissions">
-                        <h4>Permissions:</h4>
-                        <ul>
-                            <li v-for="permission in role.permissions" :key="permission.id">
-                                {{ permission.name }}
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+      </div>
+  
+      <!-- Modal -->
+      <div v-if="showModal" class="modal-overlay">
+        <div class="modal">
+          <h2>{{ isEditing ? 'Edit Role' : 'Create New Role' }}</h2>
+          <form @submit.prevent="handleSubmit" class="modal-form">
+            <div class="form-group">
+              <label for="name">System Name</label>
+              <input type="text" id="name" v-model="formData.name" required maxlength="255" 
+                     :disabled="isEditing" placeholder="role-system-name" />
             </div>
-        </div>
-
-        <!-- Create/Edit Modal -->
-        <div v-if="showModal" class="modal">
-            <div class="modal-content">
-                <h2>{{ isEditing ? 'Edit Role' : 'Create New Role' }}</h2>
-                <form @submit.prevent="handleSubmit">
-                    <div class="form-group">
-                        <label for="name">Role Name</label>
-                        <input
-                            type="text"
-                            id="name"
-                            v-model="formData.name"
-                            required
-                        />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="description">Description</label>
-                        <textarea
-                            id="description"
-                            v-model="formData.description"
-                            required
-                        ></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Permissions</label>
-                        <div class="permissions-list">
-                            <div v-for="perm in availablePermissions" :key="perm.id" class="permission-item">
-                                <input
-                                    type="checkbox"
-                                    :id="'perm-' + perm.id"
-                                    v-model="formData.permissions"
-                                    :value="perm.id"
-                                />
-                                <label :for="'perm-' + perm.id">{{ perm.name }}</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-actions">
-                        <button type="button" @click="closeModal" class="cancel-btn">
-                            Cancel
-                        </button>
-                        <button type="submit" class="submit-btn">
-                            {{ isEditing ? 'Update' : 'Create' }}
-                        </button>
-                    </div>
-                </form>
+  
+            <div class="form-group">
+              <label for="display_name">Display Name</label>
+              <input type="text" id="display_name" v-model="formData.display_name" required maxlength="255" 
+                     placeholder="Role Display Name" />
             </div>
+  
+            <div class="form-group">
+              <label for="description">Description (Optional)</label>
+              <textarea id="description" v-model="formData.description" rows="3" 
+                        placeholder="Role description"></textarea>
+            </div>
+  
+            <div class="form-group">
+              <label for="role_type_id">Role Type</label>
+              <select id="role_type_id" v-model="formData.role_type_id" required>
+                <option value="">Select a role type</option>
+                <option v-for="type in roleTypes" :key="type.id" :value="type.id">
+                  {{ type.name }}
+                </option>
+              </select>
+            </div>
+  
+            <div class="form-group">
+              <label for="scope_type_id">Scope Type</label>
+              <select id="scope_type_id" v-model="formData.scope_type_id" required>
+                <option value="">Select a scope type</option>
+                <option v-for="scope in scopeTypes" :key="scope.id" :value="scope.id">
+                  {{ scope.name }}
+                </option>
+              </select>
+            </div>
+  
+            <div class="modal-actions">
+              <button type="button" @click="closeModal" class="secondary-btn">Cancel</button>
+              <button type="submit" class="primary-btn">{{ isEditing ? 'Update' : 'Create' }}</button>
+            </div>
+          </form>
         </div>
+      </div>
     </div>
 </template>
 
@@ -94,14 +89,17 @@
     import { roleService } from '../api/services/roleService';
 
     const roles = ref([]);
+    const roleTypes = ref([]);
+    const scopeTypes = ref([]);
     const loading = ref(true);
     const showModal = ref(false);
     const isEditing = ref(false);
-    const availablePermissions = ref([]);
     const formData = ref({
         name: '',
+        display_name: '',
         description: '',
-        permissions: []
+        role_type_id: '',
+        scope_type_id: ''
     });
 
     const fetchRoles = async () => {
@@ -116,28 +114,34 @@
         }
     };
 
-    const fetchPermissions = async () => {
+    const fetchRoleTypes = async () => {
         try {
-            const response = await roleService.getPermissions();
-            availablePermissions.value = response.data.data;
+            const response = await roleService.getRoleTypes();
+            roleTypes.value = response.data.data;
         } catch (error) {
-            console.error('Failed to fetch permissions:', error);
+            console.error('Failed to fetch role types:', error);
+        }
+    };
+
+    const fetchScopeTypes = async () => {
+        try {
+            const response = await roleService.getScopeTypes();
+            scopeTypes.value = response.data.data;
+        } catch (error) {
+            console.error('Failed to fetch scope types:', error);
         }
     };
 
     const editRole = (role) => {
         isEditing.value = true;
-        formData.value = {
-            ...role,
-            permissions: role.permissions.map(p => p.id)
-        };
+        formData.value = { ...role };
         showModal.value = true;
     };
 
-    const deleteRole = async (roleId) => {
+    const deleteRole = async (uuid) => {
         if (confirm('Are you sure you want to delete this role?')) {
             try {
-                await roleService.deleteRole(roleId);
+                await roleService.deleteRole(uuid);
                 await fetchRoles();
             } catch (error) {
                 console.error('Failed to delete role:', error);
@@ -148,7 +152,7 @@
     const handleSubmit = async () => {
         try {
             if (isEditing.value) {
-                await roleService.updateRole(formData.value.id, formData.value);
+                await roleService.updateRole(formData.value.uuid, formData.value);
             } else {
                 await roleService.createRole(formData.value);
             }
@@ -164,188 +168,164 @@
         isEditing.value = false;
         formData.value = {
             name: '',
+            display_name: '',
             description: '',
-            permissions: []
+            role_type_id: '',
+            scope_type_id: ''
         };
     };
 
     onMounted(() => {
         fetchRoles();
-        fetchPermissions();
+        fetchRoleTypes();
+        fetchScopeTypes();
     });
 </script>
 
 <style scoped>
-    .roles-page {
-        padding: 2rem;
-    }
+/* Layout */
+.roles-page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: auto;
+}
 
-    .actions {
-        margin: 2rem 0;
-    }
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
 
-    .create-btn {
-        padding: 0.5rem 1rem;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
+/* Grid */
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
 
-    .roles-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 2rem;
-    }
+/* Card */
+.role-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
 
-    .role-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
+.role-info h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
 
-    .role-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
+.code {
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 0.2rem;
+  font-family: monospace;
+}
 
-    .role-actions {
-        display: flex;
-        gap: 0.5rem;
-    }
+.description {
+  margin-top: 0.5rem;
+  color: #555;
+  font-size: 0.9rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
-    .edit-btn,
-    .delete-btn {
-        padding: 0.25rem 0.5rem;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
 
-    .edit-btn {
-        background-color: #2196F3;
-        color: white;
-    }
+.tag {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
 
-    .delete-btn {
-        background-color: #f44336;
-        color: white;
-    }
+/* Actions */
+.role-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
 
-    .role-description {
-        color: #666;
-        margin-bottom: 1rem;
-    }
+.action-btn {
+  padding: 0.4rem 0.6rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
 
-    .role-permissions {
-        background-color: #f5f5f5;
-        padding: 1rem;
-        border-radius: 4px;
-    }
+.action-btn.edit {
+  background-color: #2196F3;
+  color: white;
+}
 
-    .role-permissions h4 {
-        margin-bottom: 0.5rem;
-    }
+.action-btn.delete {
+  background-color: #f44336;
+  color: white;
+}
 
-    .role-permissions ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
+/* Form */
+.modal-form textarea {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+}
 
-    .role-permissions li {
-        padding: 0.25rem 0;
-        color: #666;
-    }
+.modal-form select {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: white;
+}
 
-    .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+/* Button */
+.primary-btn, .secondary-btn {
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
 
-    .modal-content {
-        background: white;
-        padding: 2rem;
-        border-radius: 8px;
-        width: 100%;
-        max-width: 500px;
-        max-height: 90vh;
-        overflow-y: auto;
-    }
+.primary-btn {
+  background-color: #4CAF50;
+  color: white;
+}
 
-    .form-group {
-        margin-bottom: 1rem;
-    }
+.primary-btn:hover {
+  background-color: #45A049;
+}
 
-    .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-    }
+.secondary-btn {
+  background-color: #ddd;
+  color: #333;
+}
 
-    .form-group input[type="text"],
-    .form-group textarea {
-        width: 100%;
-        padding: 0.5rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
+.secondary-btn:hover {
+  background-color: #ccc;
+}
 
-    .permissions-list {
-        max-height: 200px;
-        overflow-y: auto;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 0.5rem;
-    }
-
-    .permission-item {
-        display: flex;
-        align-items: center;
-        padding: 0.25rem 0;
-    }
-
-    .permission-item input[type="checkbox"] {
-        margin-right: 0.5rem;
-    }
-
-    .modal-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 1rem;
-        margin-top: 2rem;
-    }
-
-    .cancel-btn,
-    .submit-btn {
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    .cancel-btn {
-        background-color: #ddd;
-    }
-
-    .submit-btn {
-        background-color: #4CAF50;
-        color: white;
-    }
-
-    .loading {
-        text-align: center;
-        color: #666;
-        padding: 2rem;
-    }
+/* Inherit other styles from UsersPage.vue */
 </style>
