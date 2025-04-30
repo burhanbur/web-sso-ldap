@@ -30,7 +30,7 @@
       />
     </div>
 
-    <div v-if="loading" class="loading">Loading users...</div>
+    <div v-if="loading" class="loading spinner-container"><div class="spinner"></div></div>
     <div v-if="users.length === 0 && !loading" class="no-users text-center">Tidak ada pengguna ditemukan.</div>
     <div v-else class="users-grid">
       <div v-for="user in users" :key="user.id" class="user-card">
@@ -62,6 +62,15 @@
           </div>
 
           <div class="user-actions">
+            <button @click="impersonateUser(user)" class="action-btn impersonate">
+              <font-awesome-icon icon="user-secret" />
+            </button>
+            <button @click="changePasswordUser(user)" class="action-btn change-password">
+              <font-awesome-icon icon="unlock" />
+            </button>
+            <button @click="showUser(user)" class="action-btn show">
+              <font-awesome-icon icon="search" />
+            </button>
             <button @click="editUser(user)" class="action-btn edit">
               <font-awesome-icon icon="edit" />
             </button>
@@ -70,8 +79,6 @@
       </div>
     </div>
 
-    <br>
-    <hr>
     <br>
 
     <!-- Pagination -->
@@ -93,6 +100,28 @@
       >
         <font-awesome-icon class="pagination-icon" icon="chevron-right" />
       </button>
+    </div>
+
+    <!-- Modal Change Password -->
+    <div v-if="showChangePasswordModal" class="modal-overlay">
+      <div class="modal">
+        <h2>Ubah Password Pengguna</h2>
+        <form @submit.prevent="handleChangePassword" class="modal-form">
+          <div class="form-group">
+            <label for="password">Password Baru</label>
+            <input type="password" id="password" placeholder="Password baru pengguna" v-model="formDataChangePassword.password" required />
+          </div>
+          <div class="form-group">
+            <label for="password_confirmation">Konfirmasi Password</label>
+            <input type="password" id="password_confirmation" placeholder="Konfirmasi password baru pengguna" v-model="formDataChangePassword.password_confirmation" required />
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" @click="closeChangePasswordModal" class="secondary-btn">Batal</button>
+            <button type="submit" class="primary-btn">Simpan</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Modal Create/Edit -->
@@ -174,10 +203,13 @@
 
 <script setup>
     import { ref, computed, onMounted, watch } from 'vue';
+    import { authService } from '../api/services/authService';
     import { userService } from '../api/services/userService';
     import { roleService } from '../api/services/roleService';
     import debounce from 'lodash/debounce';
     import defaultAvatar from '../assets/img/default.png';
+    import Swal from 'sweetalert2';
+    import { successToast, errorToast } from '@/utils/toast'
 
     const availableRoles = ref([]);
     const users = ref([]);
@@ -192,6 +224,7 @@
 
     const loading = ref(true);
     const showModal = ref(false);
+    const showChangePasswordModal = ref(false);
     const showCreateModal = ref(false);
     const showEditModal = ref(false);
     const isEditing = ref(false);
@@ -216,25 +249,30 @@
         roles: []
     });
 
+    const formDataChangePassword = ref({
+        password: '',
+        password_confirmation: ''
+    });
+
     watch(showCreateModal, (newVal) => {
         if (newVal) {
-            showModal.value = true;
-            showCreateModal.value = true;
-            isEditing.value = false;
-            formData.value = {
-                username: '',
-                code: '',
-                full_name: '',
-                nickname: '',
-                email: '',
-                alt_email: '',
-                join_date: '',
-                title: '',
-                status: 'Aktif',
-                password: '',
-                password_confirmation: '',
-                roles: []
-            };
+          showModal.value = true;
+          showCreateModal.value = true;
+          isEditing.value = false;
+          formData.value = {
+              username: '',
+              code: '',
+              full_name: '',
+              nickname: '',
+              email: '',
+              alt_email: '',
+              join_date: '',
+              title: '',
+              status: 'Aktif',
+              password: '',
+              password_confirmation: '',
+              roles: []
+          };
         }
     });
 
@@ -260,6 +298,43 @@
             loading.value = false;
         }
     };
+
+    const impersonateUser = async (user) => {
+        const result = await Swal.fire({
+          title: 'Apakah Anda yakin?',
+          text: `Anda akan masuk sebagai pengguna ini!`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: 'Ya, masuk!',
+          cancelButtonText: 'Batal'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                // const response = await authService.impersonateUser(user.uuid);
+                // window.location.href = response.data.redirect_url;
+                // TODO
+                successToast('Berhasil masuk sebagai pengguna!');
+            } catch (error) {
+                errorToast(error.response.data.message);
+            }
+        }
+    }
+
+    const showUser = async (user) => {
+        const result = await Swal.fire({
+          title: 'Detail Pengguna',
+          html: `<strong>Nama:</strong> ${user.full_name}<br>
+                 <strong>Username:</strong> ${user.username}<br>
+                 <strong>Email:</strong> ${user.email}<br>
+                 <strong>Status:</strong> ${user.status}`,
+          icon: 'info',
+          showCloseButton: true,
+          confirmButtonText: 'Tutup'
+        });
+    }
 
     const fetchRoles = async () => {
         try {
@@ -290,15 +365,13 @@
         showModal.value = true;
     };
 
-    const deleteUser = async (user) => {
-        if (confirm('Are you sure you want to delete this user?')) {
-            try {
-                await userService.deleteUser(user.uuid);
-                await fetchUsers();
-            } catch (error) {
-                console.error('Failed to delete user:', error);
-            }
-        }
+    const changePasswordUser = (user) => {
+        showChangePasswordModal.value = true;
+        formDataChangePassword.value = {
+          username: user.username,
+          password: '',
+          password_confirmation: ''
+        };
     };
 
     const toggleUserStatus = async (user) => {
@@ -321,14 +394,6 @@
         debouncedFetchUsers();
     };
 
-    // Handle Page Change
-    const handlePageChange = (page) => {
-        if (page >= 1 && page <= totalPages.value) {
-            currentPage.value = page;
-            fetchUsers();
-        }
-    };
-
     const handleSubmit = async () => {
         try {
             if (isEditing.value) {
@@ -341,6 +406,42 @@
         } catch (error) {
             console.error('Failed to save user:', error);
         }
+    };
+
+    const handleChangePassword = async () => {
+        const result = await Swal.fire({
+          title: 'Apakah Anda yakin?',
+          text: `Password user akan diganti!`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: 'Ya, ganti!',
+          cancelButtonText: 'Batal'
+        });
+
+        if (result.isConfirmed) {
+          try {
+            const response = await authService.changeUserPassword(
+              formDataChangePassword.value.username, 
+              formDataChangePassword.value.password, 
+              formDataChangePassword.value.password_confirmation
+            );
+            
+            successToast(response.data.message);
+            closeChangePasswordModal();
+          } catch (error) {
+            errorToast(error.response.data.message);
+          }
+        }
+    };
+
+    const closeChangePasswordModal = () => {
+        showChangePasswordModal.value = false;
+        formDataChangePassword.value = {
+            password: '',
+            password_confirmation: ''
+        };
     };
 
     const closeModal = () => {
@@ -392,7 +493,7 @@
     }
 
     onMounted(() => {
-        fetchUsers();
+      fetchUsers();
     });
 </script>
 
@@ -554,6 +655,21 @@
 
 .action-btn.delete {
   background-color: #f44336;
+  color: white;
+}
+
+.action-btn.change-password {
+  background-color: #FFC107;
+  color: white;
+}
+
+.action-btn.impersonate {
+  background-color: #343a40;
+  color: white;
+}
+
+.action-btn.show {
+  background-color: #17a2b8;
   color: white;
 }
 

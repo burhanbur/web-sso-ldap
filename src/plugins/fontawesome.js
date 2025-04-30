@@ -17,6 +17,9 @@ import {
   faUserPlus,
   faChevronLeft,
   faChevronRight,
+  faUnlock,
+  faUserSecret,
+  faSearch,
   faTimes
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -39,5 +42,8 @@ library.add(
   faUserPlus,
   faChevronLeft,
   faChevronRight,
+  faUnlock,
+  faUserSecret,
+  faSearch,
   faTimes
 );

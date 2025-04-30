@@ -56,13 +56,18 @@
     import { useRouter } from 'vue-router';
     import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
     import { ref } from 'vue';
+    import { authService } from '../api/services/authService';
 
     const router = useRouter();
     const isMenuOpen = ref(false);
 
-    const logout = () => {
-        localStorage.removeItem('access_token');
-        router.push('/login');
+    const logout = async () => {
+        const logout = await authService.logout();
+
+        if (logout.data.success) {
+            localStorage.removeItem('access_token');
+            router.push('/login');
+        }
     };
 
     const toggleMenu = () => {

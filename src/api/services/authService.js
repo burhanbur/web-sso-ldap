@@ -4,6 +4,9 @@ export const authService = {
     login: (username, password) => {
         return api.post('/auth/login', { username, password });
     },
+    logout: () => {
+        return api.post('/auth/logout');
+    },
     forgotPassword: (email) => {
         return api.post('/auth/password/forgot', { email });
     },
@@ -15,7 +18,27 @@ export const authService = {
             token
         });
     },
+    changeUserPassword: (username, password, password_confirmation) => {
+        return api.post('/auth/password/change', {
+            username,
+            password,
+            password_confirmation
+        });
+    },
+    changeMyPassword: (username, password, password_confirmation) => {
+        return api.post('/auth/me/password/change', {
+            password,
+            password,
+            password_confirmation
+        });
+    },
     refreshToken: () => {
         return api.post('/auth/refresh');
+    },
+    me: () => {
+        return api.get('/auth/me');
+    },
+    impersonateUser: (uuid) => {
+
     }
 };

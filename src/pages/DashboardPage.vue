@@ -6,11 +6,11 @@
   
       <section class="dashboard-section">
         <h2>🚀 Aplikasi Klien</h2>
-        <div v-if="loadingApps" class="loading">Loading applications...</div>
+        <div v-if="loadingApps" class="loading spinner-container"><div class="spinner"></div></div>
         <div v-else class="applications-grid">
           <div v-for="app in applications" :key="app.id" class="app-card">
             <h3>
-              <router-link :to="`/applications/${app.id}`">{{ app.name }}</router-link>
+              <router-link :to="`/applications/${app.login_url}`">{{ app.name }}</router-link>
             </h3>
             <p>{{ app.description }}</p>
           </div>
@@ -19,7 +19,7 @@
   
       <section class="dashboard-section">
         <h2>🧑‍💻 Pengguna Terbaru</h2>
-        <div v-if="loadingUsers" class="loading">Loading users...</div>
+        <div v-if="loadingUsers" class="loading spinner-container"><div class="spinner"></div></div>
         <div v-else class="users-list">
           <div v-for="user in latestUsers" :key="user.id" class="user-item">
             <div class="user-info">

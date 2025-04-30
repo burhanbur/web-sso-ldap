@@ -20,7 +20,6 @@ const TOKEN_REFRESH_THRESHOLD = 1 * 60; // Refresh token 5 minutes before expiry
 // Token refresh state
 let isRefreshing = false;
 let refreshPromise = null;
-let failedQueue = [];
 let lastTokenCheck = 0;
 const TOKEN_CHECK_INTERVAL = 60 * 1000; // Check token every minute
 
@@ -37,18 +36,6 @@ if (typeof window !== 'undefined') {
         window.addEventListener(event, updateActivity);
     });
 }
-
-// Process queued requests
-const processQueue = (error, token = null) => {
-    failedQueue.forEach(prom => {
-        if (error) {
-            prom.reject(error);
-        } else {
-            prom.resolve(token);
-        }
-    });
-    failedQueue = [];
-};
 
 // Refresh token handler
 const handleTokenRefresh = async () => {
