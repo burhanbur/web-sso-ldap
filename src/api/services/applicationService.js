@@ -7,13 +7,16 @@ export const applicationService = {
     createApplication: (application) => {
         return api.post('/applications', application);
     },
-    updateApplication: (id, application) => {
-        return api.put(`/applications/${id}`, application);
+    updateApplication: (uuid, application) => {
+        return api.put(`/applications/${uuid}`, application);
     },
-    deleteApplication: (id) => {
-        return api.delete(`/applications/${id}`);
+    deleteApplication: (uuid) => {
+        return api.delete(`/applications/${uuid}`);
     },
-    getApplicationById: (id) => {
-        return api.get(`/applications/${id}`);
+    getApplicationById: (uuid) => {
+        return api.get(`/applications/${uuid}`);
+    },
+    updateUserStatus: (uuid, status) => {
+        return api.put(`/applications/${uuid}/status`, status );
     },
 };

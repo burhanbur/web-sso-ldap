@@ -1,14 +1,37 @@
 <template>
-    <div class="applications-page">
-      <div class="header">
+    <div class="layout-page">
+      <div class="header-page">
         <h1>Manajemen Aplikasi Klien</h1>
-        <button @click="showModal = true" class="primary-btn">
-          + Tambah Aplikasi
+        <button @click="showCreateModal = true" class="primary-btn">
+          <font-awesome-icon icon="plus" />
         </button>
       </div>
+      
+      <!-- Search and Filter -->
+      <div class="toolbar">
+        <input 
+          v-model="search" 
+          @input="handleSearch"
+          type="text" 
+          placeholder="Cari nama aplikasi ..." 
+          class="toolbar-input"
+        />
+        
+        <multiselect 
+          v-model="statusFilter"
+          :options="statusOptions"
+          :searchable="true"
+          :clear-on-select="false"
+          :close-on-select="true"
+          placeholder="Pilih Status"
+          label="label"
+          track-by="value"
+          class="toolbar-select"
+        />
+      </div>
   
-      <div v-if="loading" class="loading">Loading applications...</div>
-  
+      <div v-if="loading" class="loading spinner-container"><div class="spinner"></div></div>
+      <div v-if="applications.length === 0 && !loading" class="no-users text-center">Tidak ada data yang ditemukan.</div>
       <div v-else class="applications-grid">
         <div v-for="app in applications" :key="app.id" class="app-card">
           <div class="app-content">
@@ -30,18 +53,47 @@
             <a :href="app.base_url" target="_blank" class="url">{{ app.base_url }}</a>
             <!-- <a :href="app.login_url" target="_blank" class="url">{{ app.login_url }}</a> -->
           </div>
+          
+          <div class="status-toggle">
+            <label class="switch">
+              <input type="checkbox" :checked="app.is_active ? true : false" @change="toggleStatus(app)" />
+              <span class="slider"></span>
+            </label>
+            <span class="status-text">{{ app.is_active ? 'Aktif' : 'Tidak Aktif' }}</span>
+          </div>
+
           <div class="app-actions">
             <button @click="editApplication(app)" class="action-btn edit">
               <font-awesome-icon icon="edit" />
-            </button>
-            <button @click="toggleStatus(app)" class="action-btn" :class="app.is_active ? 'deactivate' : 'activate'">
-              <font-awesome-icon :icon="app.is_active ? 'ban' : 'check'" />
             </button>
             <button @click="deleteApplication(app.uuid)" class="action-btn delete">
               <font-awesome-icon icon="trash" />
             </button>
           </div>
         </div>
+      </div>
+
+      <br>
+
+      <!-- Pagination -->
+      <div class="pagination-container">
+        <button 
+          class="pagination-button" 
+          @click="prevPage" 
+          :disabled="currentPage === 1"
+        >
+          <font-awesome-icon class="pagination-icon" icon="chevron-left" />
+        </button>
+
+        <span class="pagination-text">Halaman {{ currentPage }} / {{ lastPage }}</span>
+
+        <button 
+          class="pagination-button" 
+          @click="nextPage" 
+          :disabled="currentPage === lastPage"
+        >
+          <font-awesome-icon class="pagination-icon" icon="chevron-right" />
+        </button>
       </div>
   
       <!-- Modal -->
@@ -126,13 +178,32 @@
 </template>
 
 <script setup>
-    import { ref, onMounted } from 'vue';
+    import { ref, computed, onMounted, watch } from 'vue';
     import { applicationService } from '../api/services/applicationService';
+    import debounce from 'lodash/debounce';
+    import Swal from 'sweetalert2';
+    import { successToast, errorToast } from '@/utils/toast'
 
     const applications = ref([]);
+    const totalApplications = ref([]);
+
+    const search = ref('');
+    const statusFilter = ref('');
+    const currentPage = ref(1);
+    const lastPage = ref(1);
+    const perPage = ref(10);
+    const totalPages = computed(() => Math.ceil(totalUsers.value / perPage.value));
+
     const loading = ref(true);
     const showModal = ref(false);
+    const showCreateModal = ref(false);
     const isEditing = ref(false);
+
+    const statusOptions = [
+      { label: 'Aktif', value: '1' },
+      { label: 'Tidak Aktif', value: '0' },
+    ];
+
     const formData = ref({
         code: '',
         name: '',
@@ -238,25 +309,39 @@
 </script>
 
 <style scoped>
-/* Layout */
-.applications-page {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: auto;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
 /* Grid */
 .applications-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
+}
+
+/* Button */
+.primary-btn, .secondary-btn {
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.primary-btn {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.primary-btn:hover {
+  background-color: #45A049;
+}
+
+.secondary-btn {
+  background-color: #ddd;
+  color: #333;
+}
+
+.secondary-btn:hover {
+  background-color: #ccc;
 }
 
 /* Card */
@@ -394,32 +479,39 @@
   color: white;
 }
 
-/* Button */
-.primary-btn, .secondary-btn {
-  padding: 0.6rem 1.2rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 8px;
+/* Toggle Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
   cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.primary-btn {
-  background-color: #4CAF50;
-  color: white;
-}
-
-.primary-btn:hover {
-  background-color: #45A049;
-}
-
-.secondary-btn {
-  background-color: #ddd;
-  color: #333;
-}
-
-.secondary-btn:hover {
+  inset: 0;
   background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
 }
 
 /* Form */

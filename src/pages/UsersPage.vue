@@ -1,6 +1,6 @@
 <template>
-  <div class="users-page">
-    <div class="header">
+  <div class="layout-page">
+    <div class="header-page">
       <h1>Manajemen Pengguna</h1>
       <button @click="showCreateModal = true" class="primary-btn">
         <font-awesome-icon icon="user-plus" />
@@ -31,7 +31,7 @@
     </div>
 
     <div v-if="loading" class="loading spinner-container"><div class="spinner"></div></div>
-    <div v-if="users.length === 0 && !loading" class="no-users text-center">Tidak ada pengguna ditemukan.</div>
+    <div v-if="users.length === 0 && !loading" class="no-users text-center">Tidak ada data yang ditemukan.</div>
     <div v-else class="users-grid">
       <div v-for="user in users" :key="user.id" class="user-card">
         <div class="user-top">
@@ -83,6 +83,15 @@
 
     <!-- Pagination -->
     <div class="pagination-container">
+      <div class="per-page-select">
+        <select v-model="perPage" @change="handleLimitChange">
+          <option :value="2">2</option>
+          <option :value="10">10</option>
+          <option :value="20">20</option>
+          <option :value="50">50</option>
+          <option :value="-1">Semua</option>
+        </select>
+      </div>
       <button 
         class="pagination-button" 
         @click="prevPage" 
@@ -301,8 +310,8 @@
 
     const impersonateUser = async (user) => {
         const result = await Swal.fire({
-          title: 'Apakah Anda yakin?',
-          text: `Anda akan masuk sebagai pengguna ini!`,
+          title: 'Konfirmasi',
+          text: `Anda akan masuk sebagai pengguna ini?`,
           icon: 'warning',
           showCancelButton: true,
           confirmButtonColor: '#d33',
@@ -327,7 +336,9 @@
         const result = await Swal.fire({
           title: 'Detail Pengguna',
           html: `<strong>Nama:</strong> ${user.full_name}<br>
+                 <strong>Nomor Induk:</strong> ${user.code}<br>
                  <strong>Username:</strong> ${user.username}<br>
+                 <strong>Nama Panggilan:</strong> ${user.nickname}<br>
                  <strong>Email:</strong> ${user.email}<br>
                  <strong>Status:</strong> ${user.status}`,
           icon: 'info',
@@ -410,7 +421,7 @@
 
     const handleChangePassword = async () => {
         const result = await Swal.fire({
-          title: 'Apakah Anda yakin?',
+          title: 'Konfirmasi',
           text: `Password user akan diganti!`,
           icon: 'warning',
           showCancelButton: true,
@@ -492,26 +503,17 @@
       }
     }
 
+    const handleLimitChange = () => {
+        currentPage.value = 1;
+        fetchUsers();
+    };
+
     onMounted(() => {
       fetchUsers();
     });
 </script>
 
 <style scoped>
-/* Layout */
-.users-page {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: auto;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
 /* Button */
 .primary-btn, .secondary-btn {
   padding: 0.6rem 1.2rem;
@@ -858,6 +860,7 @@ input:checked + .slider:before {
   gap: 10px;
   font-family: Arial, sans-serif;
   font-size: 16px;
+  margin-top: 1rem;
 }
 
 /* Tombol */
@@ -893,4 +896,24 @@ input:checked + .slider:before {
   color: #333;
 }
 
+/* Per page select styling */
+.per-page-select {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.per-page-select select {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: white;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.per-page-select select:focus {
+    outline: none;
+    border-color: #007bff;
+}
 </style>

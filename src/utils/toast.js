@@ -31,7 +31,7 @@ export const successToast = (message = 'Berhasil!') => {
   baseToast.fire({ icon: 'success', title: message, background: toastTypes.success, color: fontColor.white })
 }
 
-export const errorToast = (message = 'Terjadi kesalahan.') => {
+export const errorToast = (message = 'Terjadi kesalahan') => {
   baseToast.fire({ icon: 'error', title: message, background: toastTypes.error, color: fontColor.white })
 }
 
