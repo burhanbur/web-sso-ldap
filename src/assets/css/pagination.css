@@ -1,0 +1,60 @@
+
+/* Pagination */
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  margin-top: 1rem;
+}
+
+.pagination-button {
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.pagination-button:hover {
+    background-color: #0056b3;
+}
+
+.pagination-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.pagination-icon {
+    font-size: 12px;
+}
+
+.pagination-text {
+    font-weight: 500;
+    color: #333;
+}
+
+/* Limit Selection */
+.per-page-select {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.per-page-select select {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: white;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.per-page-select select:focus {
+    outline: none;
+    border-color: #007bff;
+}

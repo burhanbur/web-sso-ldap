@@ -89,7 +89,7 @@ setInterval(() => {
         localStorage.removeItem('access_token');
         router.push('/login');
     }
-}, 60000);
+}, TOKEN_CHECK_INTERVAL);
 
 // Request interceptor
 api.interceptors.request.use(async config => {

@@ -91,7 +91,7 @@
             localStorage.setItem('access_token', response.data.access_token);
             router.push('/dashboard');
         } catch (error) {
-            errorMsg.value = error.response?.data?.message || 'Invalid username or password';
+            errorMsg.value = error.response?.message || 'Invalid username or password';
         } finally {
             loading.value = false;
         }

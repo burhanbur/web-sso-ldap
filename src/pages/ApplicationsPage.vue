@@ -31,7 +31,7 @@
       </div>
   
       <div v-if="loading" class="loading spinner-container"><div class="spinner"></div></div>
-      <div v-if="applications.length === 0 && !loading" class="no-users text-center">Tidak ada data yang ditemukan.</div>
+      <div v-if="applications.length === 0 && !loading" class="text-center">Tidak ada data yang ditemukan.</div>
       <div v-else class="applications-grid">
         <div v-for="app in applications" :key="app.id" class="app-card">
           <div class="app-content">

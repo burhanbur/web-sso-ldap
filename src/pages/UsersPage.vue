@@ -2,7 +2,7 @@
   <div class="layout-page">
     <div class="header-page">
       <h1>Manajemen Pengguna</h1>
-      <button @click="showCreateModal = true" class="primary-btn">
+      <button @click="showCreateModal = true" class="create-btn">
         <font-awesome-icon icon="user-plus" />
       </button>
     </div>
@@ -28,12 +28,19 @@
         track-by="value"
         class="toolbar-select"
       />
+
+      <select id="sort" class="toolbar-select" v-model="sortSelection" @change="handleSortSelection">
+        <option value="full_name,asc">Nama (A-Z)</option>
+        <option value="full_name,desc">Nama (Z-A)</option>
+        <option value="created_at,desc">Terbaru</option>
+        <option value="created_at,asc">Terlama</option>
+      </select>
     </div>
 
     <div v-if="loading" class="loading spinner-container"><div class="spinner"></div></div>
-    <div v-if="users.length === 0 && !loading" class="no-users text-center">Tidak ada data yang ditemukan.</div>
-    <div v-else class="users-grid">
-      <div v-for="user in users" :key="user.id" class="user-card">
+    <div v-if="users.length === 0 && !loading" class="text-center">Tidak ada data yang ditemukan.</div>
+    <div v-else class="layout-grid">
+      <div v-for="user in users" :key="user.id" class="card">
         <div class="user-top">
           <img :src="user.avatar || defaultAvatar" :alt="user.full_name" class="avatar" />
           <div class="user-info">
@@ -46,6 +53,7 @@
         <div class="user-mid">
           <strong>Aplikasi: </strong>
           <div class="apps">
+            <div v-if="user.app_access.length === 0"><small>Belum ada akses ke aplikasi klien</small></div>
             <span v-for="app in user.app_access" :key="app.id" class="app-badge">
               {{ app.code }}
             </span>
@@ -61,11 +69,11 @@
             <span class="status-text">{{ user.status == 'Aktif' ? 'Aktif' : 'Tidak Aktif' }}</span>
           </div>
 
-          <div class="user-actions">
-            <button @click="impersonateUser(user)" class="action-btn impersonate">
+          <div class="data-actions">
+            <button @click="impersonateUser(user)" class="action-btn dark">
               <font-awesome-icon icon="user-secret" />
             </button>
-            <button @click="changePasswordUser(user)" class="action-btn change-password">
+            <button @click="changePasswordUser(user)" class="action-btn warning">
               <font-awesome-icon icon="unlock" />
             </button>
             <button @click="showUser(user)" class="action-btn show">
@@ -92,6 +100,7 @@
           <option :value="-1">Semua</option>
         </select>
       </div>
+
       <button 
         class="pagination-button" 
         @click="prevPage" 
@@ -113,98 +122,114 @@
 
     <!-- Modal Change Password -->
     <div v-if="showChangePasswordModal" class="modal-overlay">
-      <div class="modal">
-        <h2>Ubah Password Pengguna</h2>
-        <form @submit.prevent="handleChangePassword" class="modal-form">
-          <div class="form-group">
-            <label for="password">Password Baru</label>
-            <input type="password" id="password" placeholder="Password baru pengguna" v-model="formDataChangePassword.password" required />
-          </div>
-          <div class="form-group">
-            <label for="password_confirmation">Konfirmasi Password</label>
-            <input type="password" id="password_confirmation" placeholder="Konfirmasi password baru pengguna" v-model="formDataChangePassword.password_confirmation" required />
-          </div>
+      <div class="modal modal-md">
+        <div class="modal-header">
+          <h2 class="modal-title">Ubah Password Pengguna</h2>
+          <button type="button" class="modal-close" @click="closeChangePasswordModal">
+            <span>&times;</span>
+          </button>
+        </div>
 
-          <div class="modal-actions">
-            <button type="button" @click="closeChangePasswordModal" class="secondary-btn">Batal</button>
-            <button type="submit" class="primary-btn">Simpan</button>
-          </div>
-        </form>
+        <div class="modal-body">
+          <form @submit.prevent="handleChangePassword" class="modal-form">
+            <div class="form-group">
+              <label for="password">Password Baru</label>
+              <input type="password" id="password" placeholder="Password baru pengguna" v-model="formDataChangePassword.password" required />
+            </div>
+            <div class="form-group">
+              <label for="password_confirmation">Konfirmasi Password</label>
+              <input type="password" id="password_confirmation" placeholder="Konfirmasi password baru pengguna" v-model="formDataChangePassword.password_confirmation" required />
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" @click="closeChangePasswordModal" class="btn btn-secondary">Batal</button>
+          <button type="submit" class="btn btn-success"><font-awesome-icon icon="save" />&nbsp; Simpan</button>
+        </div>
       </div>
     </div>
 
     <!-- Modal Create/Edit -->
     <div v-if="showModal" class="modal-overlay">
-      <div class="modal">
-        <h2>{{ isEditing ? 'Edit Pengguna' : 'Tambah Pengguna Baru' }}</h2>
-        <form @submit.prevent="handleSubmit" class="modal-form">
-          <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" placeholder="Username pengguna" v-model="formData.username" required />
-          </div>
+      <div class="modal modal-md">
+        <div class="modal-header">
+          <h2 class="modal-title">{{ isEditing ? 'Edit Pengguna' : 'Tambah Pengguna Baru' }}</h2>
+          <button type="button" class="modal-close" @click="closeModal">
+            <span>&times;</span>
+          </button>
+        </div>
 
-          <div class="form-group">
-            <label for="code">Nomor Induk</label>
-            <input type="text" id="code" placeholder="Nomor induk pengguna" v-model="formData.code" required />
-          </div>
-
-          <div class="form-group">
-            <label for="full_name">Nama Lengkap</label>
-            <input type="text" id="full_name" placeholder="Nama lengkap pengguna" v-model="formData.full_name" required />
-          </div>
-
-          <div class="form-group">
-            <label for="nickname">Nama Panggilan</label>
-            <input type="text" id="nickname" placeholder="Nama panggilan pengguna" v-model="formData.nickname" required />
-          </div>
-
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" placeholder="Email pengguna" v-model="formData.email" required />
-          </div>
-
-          <div class="form-group">
-            <label for="alt_email">Email Alternatif</label>
-            <input type="email" id="alt_email" placeholder="Email alternatikf pengguna (Opsional)" v-model="formData.alt_email" />
-          </div>
-
-          <div class="form-group">
-            <label for="join_date">Tanggal Bergabung</label>
-            <input type="date" id="join_date" v-model="formData.join_date" required />
-          </div>
-
-          <div class="form-group">
-            <label for="title">Jabatan</label>
-            <input type="text" id="title" placeholder="Jabatan pengguna" v-model="formData.title" required />
-          </div>
-
-          <div v-if="!isEditing">
+        <div class="modal-body">
+          <form @submit.prevent="handleSubmit" class="modal-form">
             <div class="form-group">
-              <label for="password">{{ isEditing ? 'Password Baru (Opsional)' : 'Password' }}</label>
-              <input type="password" id="password" placeholder="Password pengguna" v-model="formData.password" :required="!isEditing" />
+              <label for="username">Username</label>
+              <input type="text" id="username" placeholder="Username pengguna" v-model="formData.username" required />
             </div>
 
-            <div class="form-group" v-if="!isEditing">
-              <label for="password_confirmation">Konfirmasi Password</label>
-              <input type="password" id="password_confirmation" placeholder="Konfirmasi password pengguna" v-model="formData.password_confirmation" :required="!isEditing" />
+            <div class="form-group">
+              <label for="code">Nomor Induk</label>
+              <input type="text" id="code" placeholder="Nomor induk pengguna" v-model="formData.code" required />
             </div>
-          </div>
-          
-          <!-- <div class="form-group">
-            <label>Role Pengguna</label>
-            <div class="roles-checkboxes">
-              <div v-for="role in availableRoles" :key="role.id" class="checkbox-item">
-                <input type="checkbox" :id="'role-' + role.id" v-model="formData.roles" :value="role.id" />
-                <label :for="'role-' + role.id">{{ role.name }}</label>
+
+            <div class="form-group">
+              <label for="full_name">Nama Lengkap</label>
+              <input type="text" id="full_name" placeholder="Nama lengkap pengguna" v-model="formData.full_name" required />
+            </div>
+
+            <div class="form-group">
+              <label for="nickname">Nama Panggilan</label>
+              <input type="text" id="nickname" placeholder="Nama panggilan pengguna" v-model="formData.nickname" required />
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" placeholder="Email pengguna" v-model="formData.email" required />
+            </div>
+
+            <div class="form-group">
+              <label for="alt_email">Email Alternatif</label>
+              <input type="email" id="alt_email" placeholder="Email alternatikf pengguna (Opsional)" v-model="formData.alt_email" />
+            </div>
+
+            <div class="form-group">
+              <label for="join_date">Tanggal Bergabung</label>
+              <input type="date" id="join_date" v-model="formData.join_date" required />
+            </div>
+
+            <div class="form-group">
+              <label for="title">Jabatan</label>
+              <input type="text" id="title" placeholder="Jabatan pengguna" v-model="formData.title" required />
+            </div>
+
+            <div v-if="!isEditing">
+              <div class="form-group">
+                <label for="password">{{ isEditing ? 'Password Baru (Opsional)' : 'Password' }}</label>
+                <input type="password" id="password" placeholder="Password pengguna" v-model="formData.password" :required="!isEditing" />
+              </div>
+
+              <div class="form-group" v-if="!isEditing">
+                <label for="password_confirmation">Konfirmasi Password</label>
+                <input type="password" id="password_confirmation" placeholder="Konfirmasi password pengguna" v-model="formData.password_confirmation" :required="!isEditing" />
               </div>
             </div>
-          </div> -->
+            
+            <!-- <div class="form-group">
+              <label>Role Pengguna</label>
+              <div class="roles-checkboxes">
+                <div v-for="role in availableRoles" :key="role.id" class="checkbox-item">
+                  <input type="checkbox" :id="'role-' + role.id" v-model="formData.roles" :value="role.id" />
+                  <label :for="'role-' + role.id">{{ role.name }}</label>
+                </div>
+              </div>
+            </div> -->
+          </form>
+        </div>
 
-          <div class="modal-actions">
-            <button type="button" @click="closeModal" class="secondary-btn">Batal</button>
-            <button type="submit" class="primary-btn">{{ isEditing ? 'Ubah' : 'Simpan' }}</button>
-          </div>
-        </form>
+        <div class="modal-footer">
+          <button type="button" @click="closeModal" class="btn btn-secondary">Batal</button>
+          <button type="submit" class="btn btn-success"><font-awesome-icon icon="save" />&nbsp; {{ isEditing ? 'Ubah' : 'Simpan' }}</button>
+        </div>
       </div>
     </div>
   </div>
@@ -229,7 +254,8 @@
     const currentPage = ref(1);
     const lastPage = ref(1);
     const perPage = ref(10);
-    const totalPages = computed(() => Math.ceil(totalUsers.value / perPage.value));
+    // const totalPages = computed(() => Math.ceil(totalUsers.value / perPage.value));
+    const sortSelection = ref('full_name,asc')
 
     const loading = ref(true);
     const showModal = ref(false);
@@ -292,7 +318,8 @@
               search: search.value,
               status: statusFilter.value,
               page: currentPage.value,
-              limit: perPage.value
+              limit: perPage.value,
+              sort: sortSelection.value
             }
 
             const response = await userService.getUsers(params);
@@ -489,6 +516,10 @@
       fetchUsers()
     }
 
+    const handleSortSelection = () => {
+      fetchUsers()
+    } 
+
     const nextPage = () => {
       if (currentPage.value < lastPage.value) {
         currentPage.value++
@@ -514,74 +545,22 @@
 </script>
 
 <style scoped>
-/* Button */
-.primary-btn, .secondary-btn {
-  padding: 0.6rem 1.2rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.primary-btn {
-  background-color: #4CAF50;
-  color: white;
-}
-
-.primary-btn:hover {
-  background-color: #45A049;
-}
-
-.secondary-btn {
-  background-color: #ddd;
-  color: #333;
-}
-
-.secondary-btn:hover {
-  background-color: #ccc;
-}
-
-/* Users grid */
-.users-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-}
-
-.user-card {
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 10px;
-  border: 1px solid #eee;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.user-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.user-card h3 {
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
-}
-
-/* Card */
-.user-card {
-  background: #fff;
-  border-radius: 10px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
 .user-top {
   display: flex;
   gap: 1rem;
+}
+
+.user-mid {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #000000;
+}
+
+.user-bottom {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .avatar {
@@ -632,288 +611,5 @@
   font-size: 0.7rem;
   display: inline-block;
   margin-top: 2px;
-}
-
-/* Actions */
-.user-actions {
-  margin-top: 1rem;
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.action-btn {
-  padding: 0.4rem 0.6rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-.action-btn.edit {
-  background-color: #2196F3;
-  color: white;
-}
-
-.action-btn.delete {
-  background-color: #f44336;
-  color: white;
-}
-
-.action-btn.change-password {
-  background-color: #FFC107;
-  color: white;
-}
-
-.action-btn.impersonate {
-  background-color: #343a40;
-  color: white;
-}
-
-.action-btn.show {
-  background-color: #17a2b8;
-  color: white;
-}
-
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem;
-  z-index: 1000;
-  animation: fadeIn 0.3s ease;
-  overflow-y: auto;
-}
-
-.modal {
-  background: white;
-  padding: 2rem;
-  border-radius: 10px;
-  width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-  position: relative;
-  margin: auto;
-  animation: scaleIn 0.3s ease;
-}
-
-/* Responsive adjustments */
-@media screen and (max-width: 640px) {
-  .modal {
-    padding: 1rem;
-    width: 95%;
-    margin: 1rem;
-  }
-
-  .form-group {
-    margin-bottom: 0.8rem;
-  }
-
-  .form-group input {
-    padding: 0.5rem;
-    font-size: 16px; /* Prevents zoom on iOS */
-  }
-}
-
-/* Make sure form elements are properly spaced and sized */
-.modal-form {
-  margin-top: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.modal-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-  margin-top: 1.5rem;
-}
-
-/* Ensure buttons are properly sized on mobile */
-.modal-actions button {
-  min-width: 80px;
-  padding: 0.6rem 1.2rem;
-}
-
-@media screen and (max-width: 480px) {
-  .modal-actions {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .modal-actions button {
-    width: 100%;
-  }
-}
-
-/* Loading */
-.loading {
-  text-align: center;
-  padding: 3rem;
-  color: #666;
-}
-
-/* User Bottom Section */
-.user-bottom {
-  margin-top: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* Toggle Switch */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 46px;
-  height: 24px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  inset: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 24px;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
-}
-
-input:checked + .slider {
-  background-color: #4CAF50;
-}
-
-input:checked + .slider:before {
-  transform: translateX(22px);
-}
-
-/* Status text */
-.status-text {
-  margin-left: 0.5rem;
-  font-size: 0.85rem;
-  color: #333;
-  font-weight: 600;
-}
-
-.toolbar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 1rem;
-  flex-wrap: wrap; /* agar tetap rapi di layar kecil */
-}
-
-.toolbar-input,
-.toolbar-select {
-  padding: 8px;
-  border-radius: 6px;
-  flex: 1 1 250px;
-  min-width: 200px;
-}
-
-.toolbar-button {
-  padding: 8px 16px;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-.toolbar-button:hover {
-  background-color: #2563eb;
-}
-
-/* Container pagination */
-.pagination-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-family: Arial, sans-serif;
-  font-size: 16px;
-  margin-top: 1rem;
-}
-
-/* Tombol */
-.pagination-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-/* Hover effect untuk tombol */
-.pagination-button:hover {
-  background-color: #0056b3;
-}
-
-/* Tombol disabled */
-.pagination-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-/* Ikon chevron */
-.pagination-icon {
-  font-size: 18px;
-}
-
-/* Teks Halaman */
-.pagination-text {
-  font-weight: 500;
-  color: #333;
-}
-
-/* Per page select styling */
-.per-page-select {
-    display: flex;
-    align-items: center;
-    margin-right: 10px;
-}
-
-.per-page-select select {
-    padding: 6px 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: white;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.per-page-select select:focus {
-    outline: none;
-    border-color: #007bff;
 }
 </style>

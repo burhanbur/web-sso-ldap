@@ -1,5 +1,9 @@
 @import './base.css';
+
 @import './css/component.css';
+@import './css/button.css';
+@import './css/pagination.css';
+@import './css/modal.css';
 
 #app {
   width: 100%;

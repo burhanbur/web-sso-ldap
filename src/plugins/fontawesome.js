@@ -20,6 +20,8 @@ import {
   faUnlock,
   faUserSecret,
   faSearch,
+  faSave,
+  faUndo,
   faTimes
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -45,5 +47,7 @@ library.add(
   faUnlock,
   faUserSecret,
   faSearch,
+  faSave,
+  faUndo,
   faTimes
 );
