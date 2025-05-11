@@ -1,8 +1,8 @@
 import api from '../axios';
 
 export const applicationService = {
-    getApplications: () => {
-        return api.get('/applications');
+    getApplications: (params) => {
+        return api.get('/applications', { params });
     },
     createApplication: (application) => {
         return api.post('/applications', application);
@@ -16,7 +16,7 @@ export const applicationService = {
     getApplicationById: (uuid) => {
         return api.get(`/applications/${uuid}`);
     },
-    updateUserStatus: (uuid, status) => {
+    updateStatus: (uuid, status) => {
         return api.put(`/applications/${uuid}/status`, status );
     },
 };

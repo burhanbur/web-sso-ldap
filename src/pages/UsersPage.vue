@@ -30,8 +30,12 @@
       />
 
       <select id="sort" class="toolbar-select" v-model="sortSelection" @change="handleSortSelection">
-        <option value="full_name,asc">Nama (A-Z)</option>
-        <option value="full_name,desc">Nama (Z-A)</option>
+        <option value="full_name,asc">Nama Lengkap (A-Z)</option>
+        <option value="full_name,desc">Nama Lengkap (Z-A)</option>
+        <option value="username,asc">Username (A-Z)</option>
+        <option value="username,desc">Username (Z-A)</option>
+        <option value="code,asc">Kode Pengguna (A-Z)</option>
+        <option value="code,desc">Kode Pengguna (Z-A)</option>
         <option value="created_at,desc">Terbaru</option>
         <option value="created_at,asc">Terlama</option>
       </select>
@@ -63,7 +67,7 @@
         <div class="user-bottom">
           <div class="status-toggle">
             <label class="switch">
-              <input type="checkbox" :checked="user.status == 'Aktif' ? true : false" @change="toggleUserStatus(user)" />
+              <input type="checkbox" :checked="user.status == 'Aktif' ? true : false" @change="toggleStatus(user)" />
               <span class="slider"></span>
             </label>
             <span class="status-text">{{ user.status == 'Aktif' ? 'Aktif' : 'Tidak Aktif' }}</span>
@@ -130,8 +134,8 @@
           </button>
         </div>
 
-        <div class="modal-body">
-          <form @submit.prevent="handleChangePassword" class="modal-form">
+        <form @submit.prevent="handleChangePassword" class="modal-form">
+          <div class="modal-body">
             <div class="form-group">
               <label for="password">Password Baru</label>
               <input type="password" id="password" placeholder="Password baru pengguna" v-model="formDataChangePassword.password" required />
@@ -140,13 +144,13 @@
               <label for="password_confirmation">Konfirmasi Password</label>
               <input type="password" id="password_confirmation" placeholder="Konfirmasi password baru pengguna" v-model="formDataChangePassword.password_confirmation" required />
             </div>
-          </form>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" @click="closeChangePasswordModal" class="btn btn-secondary">Batal</button>
-          <button type="submit" class="btn btn-success"><font-awesome-icon icon="save" />&nbsp; Simpan</button>
-        </div>
+          </div>
+          
+          <div class="modal-footer">
+            <button type="button" @click="closeChangePasswordModal" class="btn btn-secondary">Batal</button>
+            <button type="submit" class="btn btn-success"><font-awesome-icon icon="save" />&nbsp; Simpan</button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -154,14 +158,14 @@
     <div v-if="showModal" class="modal-overlay">
       <div class="modal modal-md">
         <div class="modal-header">
-          <h2 class="modal-title">{{ isEditing ? 'Edit Pengguna' : 'Tambah Pengguna Baru' }}</h2>
+          <h2 class="modal-title">{{ isEditing ? 'Ubah Pengguna' : 'Tambah Pengguna Baru' }}</h2>
           <button type="button" class="modal-close" @click="closeModal">
             <span>&times;</span>
           </button>
         </div>
 
-        <div class="modal-body">
-          <form @submit.prevent="handleSubmit" class="modal-form">
+        <form @submit.prevent="handleSubmit" class="modal-form">
+          <div class="modal-body">
             <div class="form-group">
               <label for="username">Username</label>
               <input type="text" id="username" placeholder="Username pengguna" v-model="formData.username" required />
@@ -223,13 +227,13 @@
                 </div>
               </div>
             </div> -->
-          </form>
-        </div>
+          </div>
 
-        <div class="modal-footer">
-          <button type="button" @click="closeModal" class="btn btn-secondary">Batal</button>
-          <button type="submit" class="btn btn-success"><font-awesome-icon icon="save" />&nbsp; {{ isEditing ? 'Ubah' : 'Simpan' }}</button>
-        </div>
+          <div class="modal-footer">
+            <button type="button" @click="closeModal" class="btn btn-secondary">Batal</button>
+            <button type="submit" class="btn btn-success"><font-awesome-icon icon="save" />&nbsp; {{ isEditing ? 'Ubah' : 'Simpan' }}</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -330,6 +334,7 @@
             lastPage.value = response.data.pagination.last_page;
         } catch (error) {
             console.error('Failed to fetch users:', error);
+            errorToast(error);
         } finally {
             loading.value = false;
         }
@@ -354,7 +359,7 @@
                 // TODO
                 successToast('Berhasil masuk sebagai pengguna!');
             } catch (error) {
-                errorToast(error.response.data.message);
+                errorToast(error);
             }
         }
     }
@@ -380,6 +385,7 @@
             availableRoles.value = response.data.data;
         } catch (error) {
             console.error('Failed to fetch roles:', error);
+            errorToast(error);
         }
     };
 
@@ -412,13 +418,14 @@
         };
     };
 
-    const toggleUserStatus = async (user) => {
+    const toggleStatus = async (user) => {
         try {
             let status = user.status == 'Aktif' ? 'Tidak Aktif' : 'Aktif';
             await userService.updateUserStatus(user.uuid, { status: status });
             user.status = status;
         } catch (error) {
             console.error('Failed to update user status:', error);
+            errorToast(error);
         }
     };
 
@@ -434,15 +441,18 @@
 
     const handleSubmit = async () => {
         try {
+            let response;
             if (isEditing.value) {
-                await userService.updateUser(formData.value.uuid, formData.value);
+                response = await userService.updateUser(formData.value.uuid, formData.value);
             } else {
-                await userService.createUser(formData.value);
+                response = await userService.createUser(formData.value);
             }
             await fetchUsers();
             closeModal();
+            successToast(response.data?.message);
         } catch (error) {
             console.error('Failed to save user:', error);
+            errorToast(error);
         }
     };
 
@@ -466,7 +476,7 @@
               formDataChangePassword.value.password_confirmation
             );
             
-            successToast(response.data.message);
+            successToast(response.data?.message);
             closeChangePasswordModal();
           } catch (error) {
             errorToast(error.response.data.message);
