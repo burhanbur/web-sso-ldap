@@ -98,7 +98,7 @@ input:checked + .slider:before {
     color: #fff;
 }
 
-.create-btn, .secondary-btn {
+.create-btn, .secondary-btn, .import-btn {
   padding: 0.6rem 1.2rem;
   font-size: 1rem;
   border: none;
@@ -125,6 +125,15 @@ input:checked + .slider:before {
   background-color: #ccc;
 }
 
+.import-btn {
+  background-color: #2196F3;
+  color: white;
+}
+
+.import-btn:hover {
+  background-color: #2483d0;
+}
+
 /* Actions */
 .data-actions {
   margin-top: 1rem;
@@ -146,9 +155,17 @@ input:checked + .slider:before {
   color: white;
 }
 
+.action-btn.edit:hover {
+  background-color: #2483d0;
+}
+
 .action-btn.delete {
   background-color: #f44336;
   color: white;
+}
+
+.action-btn.delete:hover {
+  background-color: #d33c31;
 }
 
 .action-btn.show {
@@ -156,12 +173,24 @@ input:checked + .slider:before {
   color: white;
 }
 
+.action-btn.show:hover {
+  background-color: #209bae;
+}
+
 .action-btn.warning {
   background-color: #FFC107;
   color: white;
 }
 
+.action-btn.warning:hover {
+  background-color: #e2b42a;
+}
+
 .action-btn.dark {
   background-color: #343a40;
   color: white;
+}
+
+.action-btn.dark:hover {
+  background-color: #353636;
 }

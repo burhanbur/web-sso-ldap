@@ -50,7 +50,6 @@
             <div class="app-info">
               <h3>{{ app.name }}</h3>
               <p class="code">{{ app.code }}</p>
-              <p class="description">{{ app.description || 'No description' }}</p>
               <div class="badges">
                 <span class="badge platform">{{ app.platform_type }}</span>
                 <span class="badge visibility">{{ app.visibility }}</span>
@@ -59,6 +58,9 @@
                 </span>
               </div>
             </div>
+          </div>
+          <div class="app-description">
+            <p class="description">{{ app.description || 'No description' }}</p>
           </div>
           <div class="app-urls">
             <a :href="app.base_url" target="_blank" class="url">{{ app.base_url }}</a>
@@ -92,7 +94,7 @@
     <div class="pagination-container">
       <div class="per-page-select">
         <select v-model="perPage" @change="handleLimitChange">
-          <option :value="2">2</option>
+          <option :value="5">5</option>
           <option :value="10">10</option>
           <option :value="20">20</option>
           <option :value="50">50</option>
@@ -289,7 +291,6 @@
             image: null
         };
         showModal.value = true;
-        console.log(isEditing.value)
     };
 
     const toggleStatus = async (app) => {
@@ -325,7 +326,6 @@
             });
 
             let response;
-            console.log(isEditing.value)
             if (isEditing.value) {
                 response = await applicationService.updateApplication(formData.value.uuid, data);
             } else {

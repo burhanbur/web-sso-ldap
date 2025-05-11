@@ -1,19 +1,28 @@
 import api from '../axios';
 
 export const roleService = {
-    getRoles: () => {
-        return api.get('/roles');
+    getRoles: (params) => {
+        return api.get('/roles', { params });
+    },
+    getEntityTypes: () => {
+        return api.get('/entity-types');
+    },
+    getRoleTypes: () => {
+        return api.get('/role-types');
+    },
+    getScopes: () => {
+        return api.get('/scopes');
     },
     createRole: (role) => {
         return api.post('/roles', role);
     },
-    updateRole: (id, role) => {
-        return api.put(`/roles/${id}`, role);
+    updateRole: (uuid, role) => {
+        return api.put(`/roles/${uuid}`, role);
     },
-    deleteRole: (id) => {
-        return api.delete(`/roles/${id}`);
+    deleteRole: (uuid) => {
+        return api.delete(`/roles/${uuid}`);
     },
-    getRoleById: (id) => {
-        return api.get(`/roles/${id}`);
+    getRoleById: (uuid) => {
+        return api.get(`/roles/${uuid}`);
     },
 };

@@ -2,6 +2,9 @@
   <div class="layout-page">
     <div class="header-page">
       <h1>Manajemen Pengguna</h1>
+      <button @click="showImportModal = true" class="import-btn">
+        <font-awesome-icon icon="download" />
+      </button>
       <button @click="showCreateModal = true" class="create-btn">
         <font-awesome-icon icon="user-plus" />
       </button>
@@ -97,7 +100,7 @@
     <div class="pagination-container">
       <div class="per-page-select">
         <select v-model="perPage" @change="handleLimitChange">
-          <option :value="2">2</option>
+          <option :value="5">5</option>
           <option :value="10">10</option>
           <option :value="20">20</option>
           <option :value="50">50</option>
@@ -429,16 +432,6 @@
         }
     };
 
-    // Handle Search (Debounced)
-    const debouncedFetchUsers = debounce(() => {
-        currentPage.value = 1;
-        fetchUsers();
-    }, 300);
-
-    const handleSearch = () => {
-        debouncedFetchUsers();
-    };
-
     const handleSubmit = async () => {
         try {
             let response;
@@ -515,6 +508,16 @@
           password_confirmation: '',
           roles: []
       };
+    };
+    
+    // Handle Search (Debounced)
+    const debouncedFetchUsers = debounce(() => {
+        currentPage.value = 1;
+        fetchUsers();
+    }, 300);
+
+    const handleSearch = () => {
+        debouncedFetchUsers();
     };
 
     watch(statusFilter, (newStatus) => {
