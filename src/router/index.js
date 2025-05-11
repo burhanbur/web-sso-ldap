@@ -63,11 +63,11 @@ const routes = [
                 name: 'roles',
                 component: RolesPage,
             },
-            {
-                path: 'user-roles',
-                name: 'user-roles',
-                component: UserRolesPage,
-            }
+            // {
+            //     path: 'user-roles',
+            //     name: 'user-roles',
+            //     component: UserRolesPage,
+            // }
         ],
         meta: { requiresAuth: true }
     },

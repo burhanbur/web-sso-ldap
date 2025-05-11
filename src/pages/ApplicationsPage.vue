@@ -94,10 +94,10 @@
     <div class="pagination-container">
       <div class="per-page-select">
         <select v-model="perPage" @change="handleLimitChange">
-          <option :value="5">5</option>
-          <option :value="10">10</option>
-          <option :value="20">20</option>
-          <option :value="50">50</option>
+          <option :value="9">9</option>
+          <option :value="15">15</option>
+          <option :value="30">30</option>
+          <option :value="60">60</option>
           <option :value="-1">Semua</option>
         </select>
       </div>
@@ -217,7 +217,7 @@
     const statusFilter = ref('');
     const currentPage = ref(1);
     const lastPage = ref(1);
-    const perPage = ref(10);
+    const perPage = ref(15);
     const sortSelection = ref('name,asc')
 
     const loading = ref(true);

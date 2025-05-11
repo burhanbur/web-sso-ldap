@@ -2,12 +2,14 @@
   <div class="layout-page">
     <div class="header-page">
       <h1>Manajemen Pengguna</h1>
-      <button @click="showImportModal = true" class="import-btn">
-        <font-awesome-icon icon="download" />
-      </button>
-      <button @click="showCreateModal = true" class="create-btn">
-        <font-awesome-icon icon="user-plus" />
-      </button>
+      <div class="header-button">
+        <button @click="showImportModal = true" class="import-btn">
+          <font-awesome-icon icon="upload" />
+        </button>
+        <button @click="showCreateModal = true" class="create-btn">
+          <font-awesome-icon icon="user-plus" />
+        </button>
+      </div>
     </div>
 
     <!-- Search and Filter -->
@@ -100,10 +102,10 @@
     <div class="pagination-container">
       <div class="per-page-select">
         <select v-model="perPage" @change="handleLimitChange">
-          <option :value="5">5</option>
-          <option :value="10">10</option>
-          <option :value="20">20</option>
-          <option :value="50">50</option>
+          <option :value="9">9</option>
+          <option :value="15">15</option>
+          <option :value="30">30</option>
+          <option :value="60">60</option>
           <option :value="-1">Semua</option>
         </select>
       </div>
@@ -139,13 +141,39 @@
 
         <form @submit.prevent="handleChangePassword" class="modal-form">
           <div class="modal-body">
-            <div class="form-group">
+            <div class="form-group password-group">
               <label for="password">Password Baru</label>
-              <input type="password" id="password" placeholder="Password baru pengguna" v-model="formDataChangePassword.password" required />
+              <input 
+                :type="showPassword ? 'text' : 'password'" 
+                id="password" 
+                placeholder="Password baru pengguna" 
+                v-model="formDataChangePassword.password" required 
+              />
+              <button 
+                type="button"
+                class="toggle-password" 
+                @click="showPassword = !showPassword"
+                :title="showPassword ? 'Hide password' : 'Show password'"
+              >
+                <font-awesome-icon :icon="showPassword ? 'eye-slash' : 'eye'" />
+              </button>
             </div>
-            <div class="form-group">
+            <div class="form-group password-group">
               <label for="password_confirmation">Konfirmasi Password</label>
-              <input type="password" id="password_confirmation" placeholder="Konfirmasi password baru pengguna" v-model="formDataChangePassword.password_confirmation" required />
+              <input 
+                :type="showPasswordConfirmation ? 'text' : 'password'" 
+                id="password_confirmation" 
+                placeholder="Konfirmasi password baru pengguna" 
+                v-model="formDataChangePassword.password_confirmation" required 
+              />
+              <button 
+                type="button"
+                class="toggle-password"
+                @click="showPasswordConfirmation = !showPasswordConfirmation"
+                :title="showPasswordConfirmation ? 'Hide password' : 'Show password'"
+              >
+                <font-awesome-icon :icon="showPasswordConfirmation ? 'eye-slash' : 'eye'" />
+              </button>
             </div>
           </div>
           
@@ -210,14 +238,40 @@
             </div>
 
             <div v-if="!isEditing">
-              <div class="form-group">
+              <div class="form-group password-group">
                 <label for="password">{{ isEditing ? 'Password Baru (Opsional)' : 'Password' }}</label>
-                <input type="password" id="password" placeholder="Password pengguna" v-model="formData.password" :required="!isEditing" />
+                <input 
+                  :type="showPassword ? 'text' : 'password'" 
+                  id="password" 
+                  placeholder="Password pengguna" 
+                  v-model="formData.password" :required="!isEditing" 
+                />
+                <button 
+                  type="button"
+                  class="toggle-password"
+                  @click="showPassword = !showPassword"
+                  :title="showPassword ? 'Hide password' : 'Show password'"
+                >
+                  <font-awesome-icon :icon="showPassword ? 'eye-slash' : 'eye'" />
+                </button>
               </div>
 
-              <div class="form-group" v-if="!isEditing">
+              <div class="form-group password-group" v-if="!isEditing">
                 <label for="password_confirmation">Konfirmasi Password</label>
-                <input type="password" id="password_confirmation" placeholder="Konfirmasi password pengguna" v-model="formData.password_confirmation" :required="!isEditing" />
+                <input 
+                  :type="showPasswordConfirmation ? 'text' : 'password'" 
+                  id="password_confirmation" 
+                  placeholder="Konfirmasi password pengguna" 
+                  v-model="formData.password_confirmation" :required="!isEditing" 
+                />
+                <button 
+                  type="button"
+                  class="toggle-password"
+                  @click="showPasswordConfirmation = !showPasswordConfirmation"
+                  :title="showPasswordConfirmation ? 'Hide password' : 'Show password'"
+                >
+                  <font-awesome-icon :icon="showPasswordConfirmation ? 'eye-slash' : 'eye'" />
+                </button>
               </div>
             </div>
             
@@ -260,7 +314,7 @@
     const statusFilter = ref('');
     const currentPage = ref(1);
     const lastPage = ref(1);
-    const perPage = ref(10);
+    const perPage = ref(15);
     // const totalPages = computed(() => Math.ceil(totalUsers.value / perPage.value));
     const sortSelection = ref('full_name,asc')
 
@@ -270,6 +324,9 @@
     const showCreateModal = ref(false);
     const showEditModal = ref(false);
     const isEditing = ref(false);
+
+    const showPassword = ref(false);
+    const showPasswordConfirmation = ref(false);
 
     const statusOptions = [
       { label: 'Aktif', value: 'Aktif' },
@@ -625,4 +682,39 @@
   display: inline-block;
   margin-top: 2px;
 }
+
+.password-group {
+  position: relative;
+}
+
+.password-group input {
+  padding-right: 40px;
+  height: 40px;
+  line-height: 40px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(0%);
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  z-index: 2;
+}
+
+.toggle-password:hover {
+  color: var(--text-secondary); 
+}
+
+.toggle-password:focus {
+  outline: none;
+}
+
 </style>

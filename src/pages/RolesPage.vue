@@ -18,8 +18,8 @@
       />
 
       <select id="sort" class="toolbar-select" v-model="sortSelection" @change="handleSortSelection">
-        <option value="display_name,asc">Nama Peran (A-Z)</option>
-        <option value="display_name,desc">Nama Peran (Z-A)</option>
+        <option value="display_name,asc">Peran (A-Z)</option>
+        <option value="display_name,desc">Peran (Z-A)</option>
         <option value="created_at,desc">Terbaru</option>
         <option value="created_at,asc">Terlama</option>
       </select>
@@ -56,10 +56,10 @@
     <div class="pagination-container">
       <div class="per-page-select">
         <select v-model="perPage" @change="handleLimitChange">
-          <option :value="5">5</option>
-          <option :value="10">10</option>
-          <option :value="20">20</option>
-          <option :value="50">50</option>
+          <option :value="9">9</option>
+          <option :value="15">15</option>
+          <option :value="30">30</option>
+          <option :value="60">60</option>
           <option :value="-1">Semua</option>
         </select>
       </div>
@@ -162,7 +162,7 @@
     const statusFilter = ref('');
     const currentPage = ref(1);
     const lastPage = ref(1);
-    const perPage = ref(10);
+    const perPage = ref(15);
     const sortSelection = ref('display_name,asc')
 
     const loading = ref(true);

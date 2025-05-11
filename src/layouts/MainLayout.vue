@@ -26,10 +26,10 @@
                         <font-awesome-icon icon="user-shield" />
                         <span>Peran</span>
                     </router-link>
-                    <router-link to="/user-roles" class="nav-item" active-class="active">
+                    <!-- <router-link to="/user-roles" class="nav-item" active-class="active">
                         <font-awesome-icon icon="user-tag" />
                         <span>Peran Pengguna</span>
-                    </router-link>
+                    </router-link> -->
                 </nav>
                 <div class="user-menu">
                     <button @click="logout" class="logout-btn">
@@ -49,6 +49,12 @@
                 </router-view>
             </div>
         </main>
+
+        <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 Universitas Pertamina. All rights reserved.</p>
+        </div>
+        </footer>
     </div>
 </template>
 
@@ -252,4 +258,31 @@
             padding: 1rem;
         }
     }
+</style>
+<style scoped>
+.footer {
+  background-color: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 1rem 2rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.footer a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.footer-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
 </style>
