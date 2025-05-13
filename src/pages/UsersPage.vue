@@ -275,15 +275,74 @@
               </div>
             </div>
             
-            <!-- <div class="form-group">
-              <label>Role Pengguna</label>
-              <div class="roles-checkboxes">
-                <div v-for="role in availableRoles" :key="role.id" class="checkbox-item">
-                  <input type="checkbox" :id="'role-' + role.id" v-model="formData.roles" :value="role.id" />
-                  <label :for="'role-' + role.id">{{ role.name }}</label>
+            <div class="akses-wrapper">
+              <label><strong>Akses Pengguna</strong></label>
+
+              <div
+                v-for="(access, index) in formData.app_access"
+                :key="index"
+                class="akses-row"
+              >
+                <div class="form-group">
+                  <label>Aplikasi</label>
+                  <select v-model="access.app_id">
+                    <option value="">-- Pilih Aplikasi --</option>
+                    <option v-for="app in availableApps" :key="app.id" :value="app.id">
+                      {{ app.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Role</label>
+                  <select v-model="access.role_id">
+                    <option value="">-- Pilih Role --</option>
+                    <option v-for="role in availableRoles" :key="role.id" :value="role.id">
+                      {{ role.display_name }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Jenis Entitas</label>
+                  <select v-model="access.entity_type_id">
+                    <option value="">(Opsional)</option>
+                    <option
+                      v-for="type in availableEntityTypes"
+                      :key="type.id"
+                      :value="type.id"
+                    >
+                      {{ type.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <!-- Entity ID -->
+                <div class="form-group">
+                  <label>Kode Entitas</label>
+                  <input
+                    type="text"
+                    v-model="access.entity_id"
+                    placeholder="misal: 55201"
+                  />
+                </div>
+
+                <!-- Tombol hapus -->
+                <div class="form-group">
+                  <label>&nbsp;</label>
+                  <button type="button" @click="removeUserRole(index)" class="btn-delete">
+                    <font-awesome-icon icon="trash" />
+                  </button>
                 </div>
               </div>
-            </div> -->
+
+              <!-- Tombol Tambah -->
+              <div style="margin-top: 10px">
+                <button type="button" @click="addUserRole" class="btn-add">
+                  <font-awesome-icon icon="plus" />
+                </button>
+              </div>
+            </div>
           </div>
 
           <div class="modal-footer">
@@ -297,17 +356,21 @@
 </template>
 
 <script setup>
-    import { ref, computed, onMounted, watch } from 'vue';
+    import { ref, computed, reactive, onMounted, watch } from 'vue';
     import { authService } from '../api/services/authService';
     import { userService } from '../api/services/userService';
+    import { applicationService } from '../api/services/applicationService';
     import { roleService } from '../api/services/roleService';
     import debounce from 'lodash/debounce';
     import defaultAvatar from '../assets/img/default.png';
     import Swal from 'sweetalert2';
     import { successToast, errorToast } from '@/utils/toast'
 
-    const availableRoles = ref([]);
-    const users = ref([]);
+    let availableApps = reactive([]);
+    let availableRoles = reactive([]);
+    let availableEntityTypes = reactive([]);
+
+    let users = reactive([]);
     const totalUsers = ref(0);
 
     const search = ref('');
@@ -333,7 +396,7 @@
       { label: 'Tidak Aktif', value: 'Tidak Aktif' },
     ];
 
-    const formData = ref({
+    const formData = reactive({
         username: '',
         code: '',
         full_name: '',
@@ -345,10 +408,10 @@
         status: 'Aktif',
         password: '',
         password_confirmation: '',
-        roles: []
+        app_access: [{ app_id: '', role_id: '', entity_type_id: '', entity_id: '' }],
     });
 
-    const formDataChangePassword = ref({
+    const formDataChangePassword = reactive({
         password: '',
         password_confirmation: ''
     });
@@ -358,20 +421,7 @@
           showModal.value = true;
           showCreateModal.value = true;
           isEditing.value = false;
-          formData.value = {
-              username: '',
-              code: '',
-              full_name: '',
-              nickname: '',
-              email: '',
-              alt_email: '',
-              join_date: '',
-              title: '',
-              status: 'Aktif',
-              password: '',
-              password_confirmation: '',
-              roles: []
-          };
+          resetFormData();
         }
     });
 
@@ -388,7 +438,7 @@
 
             const response = await userService.getUsers(params);
 
-            users.value = response.data.data;
+            users = response.data.data;
             totalUsers.value = response.data.pagination.total;
             currentPage.value = response.data.pagination.current_page;
             lastPage.value = response.data.pagination.last_page;
@@ -398,7 +448,7 @@
         } finally {
             loading.value = false;
         }
-    };
+    }
 
     const impersonateUser = async (user) => {
         const result = await Swal.fire({
@@ -441,42 +491,94 @@
 
     const fetchRoles = async () => {
         try {
-            const response = await roleService.getRoles();
-            availableRoles.value = response.data.data;
+            const params = {
+              limit: 100,
+            }
+
+            const response = await roleService.getRoles(params);
+            availableRoles = response.data.data;
         } catch (error) {
             console.error('Failed to fetch roles:', error);
             errorToast(error);
         }
-    };
+    }
+
+    const fetchApps = async () => {
+        try {
+            const params = {
+              limit: 100,
+            }
+
+            const response = await applicationService.getApplications(params);
+            availableApps = response.data.data;
+        } catch (error) {
+            console.error('Failed to fetch roles:', error);
+            errorToast(error);
+        }
+    }
+
+    const fetchEntityTypes = async () => {
+        try {
+            const response = await roleService.getEntityTypes();
+            availableEntityTypes = response.data.data;
+        } catch (error) {
+            console.error('Failed to fetch roles:', error);
+            errorToast(error);
+        }
+    }
 
     const editUser = (user) => {
-        isEditing.value = true;
-        showModal.value = true;
-        showEditModal.value = true;
-        formData.value = {
-            id: user.id,
-            uuid: user.uuid,
-            username: user.username,
-            code: user.code,
-            full_name: user.full_name,
-            nickname: user.nickname,
-            email: user.email,
-            alt_email: user.alt_email,
-            join_date: user.join_date,
-            title: user.title,
-            status: user.status,
-        };
-        showModal.value = true;
-    };
+      loadUserData(user);
+      isEditing.value = true;
+      showModal.value = true;
+      showEditModal.value = true;
+      showModal.value = true;
+    }
+
+    const loadUserData = (user) => {
+      formData.id = user.id
+      formData.uuid = user.uuid
+      formData.username = user.username
+      formData.code = user.code
+      formData.full_name = user.full_name
+      formData.nickname = user.nickname
+      formData.email = user.email
+      formData.alt_email = user.alt_email
+      formData.join_date = user.join_date
+      formData.title = user.title
+      formData.status = user.status
+
+      const mappedUserRoles = [];
+
+      user.app_access.forEach(app => {
+        const appRef = availableApps.find(a => a.code === app.code);
+
+        app.roles.forEach(role => {
+          const roleRef = availableRoles.find(r => r.name === role.code);
+          const entityTypeRef = availableEntityTypes.find(e => e.code === role.entity.type);
+
+          mappedUserRoles.push({
+            app_id: appRef?.id ?? null,
+            role_id: roleRef?.id ?? null,
+            entity_type_id: entityTypeRef?.id ?? null,
+            entity_id: role.entity.id ?? null
+          });
+        });
+      });
+
+      formData.app_access = mappedUserRoles ?? []
+
+      console.log(formData);
+    }
 
     const changePasswordUser = (user) => {
         showChangePasswordModal.value = true;
-        formDataChangePassword.value = {
+        formDataChangePassword = {
           username: user.username,
           password: '',
           password_confirmation: ''
-        };
-    };
+        }
+    }
 
     const toggleStatus = async (user) => {
         try {
@@ -487,15 +589,15 @@
             console.error('Failed to update user status:', error);
             errorToast(error);
         }
-    };
+    }
 
     const handleSubmit = async () => {
         try {
             let response;
             if (isEditing.value) {
-                response = await userService.updateUser(formData.value.uuid, formData.value);
+                response = await userService.updateUser(formData.uuid, formData);
             } else {
-                response = await userService.createUser(formData.value);
+                response = await userService.createUser(formData);
             }
             await fetchUsers();
             closeModal();
@@ -504,12 +606,12 @@
             console.error('Failed to save user:', error);
             errorToast(error);
         }
-    };
+    }
 
     const handleChangePassword = async () => {
         const result = await Swal.fire({
           title: 'Konfirmasi',
-          text: `Password user akan diganti!`,
+          text: `Password pengguna akan diganti!`,
           icon: 'warning',
           showCancelButton: true,
           confirmButtonColor: '#d33',
@@ -521,9 +623,9 @@
         if (result.isConfirmed) {
           try {
             const response = await authService.changeUserPassword(
-              formDataChangePassword.value.username, 
-              formDataChangePassword.value.password, 
-              formDataChangePassword.value.password_confirmation
+              formDataChangePassword.username, 
+              formDataChangePassword.password, 
+              formDataChangePassword.password_confirmation
             );
             
             successToast(response.data?.message);
@@ -532,15 +634,15 @@
             errorToast(error.response.data.message);
           }
         }
-    };
+    }
 
     const closeChangePasswordModal = () => {
         showChangePasswordModal.value = false;
-        formDataChangePassword.value = {
+        formDataChangePassword = {
             password: '',
             password_confirmation: ''
-        };
-    };
+        }
+    }
 
     const closeModal = () => {
         showModal.value = false;
@@ -548,26 +650,37 @@
         showEditModal.value = false;
         isEditing.value = false;
         resetFormData();
-    };
+    }
+
+    const addUserRole = () => {
+      formData.app_access.push({
+        app_id: '',
+        role_id: '',
+        entity_type_id: '',
+        entity_id: ''
+      })
+    }
+
+    const removeUserRole = (index) => {
+      formData.app_access.splice(index, 1)
+    }
 
     const resetFormData = () => {
-      formData.value = {
-          username: '',
-          code: '',
-          full_name: '',
-          nickname: '',
-          email: '',
-          alt_email: '',
-          join_date: '',
-          title: '',
-          status: 'Aktif',
-          password: '',
-          password_confirmation: '',
-          roles: []
-      };
-    };
+      formData.username = ''
+      formData.code = ''
+      formData.full_name = ''
+      formData.nickname = ''
+      formData.email = ''
+      formData.alt_email = ''
+      formData.join_date = ''
+      formData.title = ''
+      formData.status = 'Aktif'
+      formData.password = ''
+      formData.password_confirmation = ''
+      formData.app_access = [{ app_id: '', role_id: '', entity_type_id: '', entity_id: '' }]
+    }
     
-    // Handle Search (Debounced)
+    /* start: filter, search and pagination */
     const debouncedFetchUsers = debounce(() => {
         currentPage.value = 1;
         fetchUsers();
@@ -575,7 +688,7 @@
 
     const handleSearch = () => {
         debouncedFetchUsers();
-    };
+    }
 
     watch(statusFilter, (newStatus) => {
       handleFilter(newStatus)
@@ -607,10 +720,14 @@
     const handleLimitChange = () => {
         currentPage.value = 1;
         fetchUsers();
-    };
+    }
+    /* end: filter, search and pagination */
 
     onMounted(() => {
       fetchUsers();
+      fetchRoles();
+      fetchApps();
+      fetchEntityTypes();
     });
 </script>
 
@@ -715,6 +832,47 @@
 
 .toggle-password:focus {
   outline: none;
+}
+
+.akses-wrapper {
+  margin-top: 15px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.akses-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fafafa;
+}
+
+.btn-add,
+.btn-delete {
+  padding: 8px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-delete {
+  background-color: #dc3545;
+}
+
+.btn-add:hover {
+  background-color: #0056b3;
+}
+
+.btn-delete:hover {
+  background-color: #b02a37;
 }
 
 </style>

@@ -30,8 +30,8 @@
         /> -->
 
         <select id="sort" class="toolbar-select" v-model="sortSelection" @change="handleSortSelection">
-          <option value="name,asc">Nama (A-Z)</option>
-          <option value="name,desc">Nama (Z-A)</option>
+          <option value="name,asc">Nama Aplikasi (A-Z)</option>
+          <option value="name,desc">Nama Aplikasi (Z-A)</option>
           <option value="code,asc">Kode (A-Z)</option>
           <option value="code,desc">Kode (Z-A)</option>
           <option value="is_active,asc">Status (Z-A)</option>
