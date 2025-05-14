@@ -199,17 +199,56 @@
           <div class="modal-body">
             <div class="form-group">
               <label for="username">Username</label>
-              <input type="text" id="username" placeholder="Username pengguna" v-model="formData.username" required />
+              <div class="username-input-group">
+                <input 
+                  type="text" 
+                  id="username" 
+                  placeholder="Username pengguna" 
+                  v-model="formData.username" 
+                  :readonly="!isEditingUsername" 
+                  required 
+                  class="form-control"
+                />
+                <button 
+                  v-if="!isEditing"
+                  type="button" 
+                  class="btn-generate" 
+                  @click="autoGenerateUsername" 
+                  title="Generate username"
+                  :disabled="isEditingUsername"
+                  aria-label="Generate username"
+                >
+                  <font-awesome-icon icon="sync" />
+                </button>
+                <button 
+                  type="button" 
+                  class="btn-edit" 
+                  :class="{ 'active': isEditingUsername }"
+                  @click="toggleEditUsername" 
+                  title="Edit username"
+                  aria-label="Toggle username edit"
+                >
+                  <font-awesome-icon icon="edit" />
+                </button>
+              </div>
+              <small class="form-text text-muted">{{ isEditing ? 'Klik ikon edit untuk mengubah username' : 'Username akan digenerate otomatis, atau klik ikon edit untuk custom' }}</small>
+            </div>
+
+            <div class="form-group">
+              <label for="full_name">Nama Lengkap</label>
+              <input 
+                type="text" 
+                id="full_name" 
+                placeholder="Nama lengkap pengguna" 
+                v-model="formData.full_name" 
+                required 
+                @input="onFullNameInput"
+              />
             </div>
 
             <div class="form-group">
               <label for="code">Nomor Induk</label>
               <input type="text" id="code" placeholder="Nomor induk pengguna" v-model="formData.code" required />
-            </div>
-
-            <div class="form-group">
-              <label for="full_name">Nama Lengkap</label>
-              <input type="text" id="full_name" placeholder="Nama lengkap pengguna" v-model="formData.full_name" required />
             </div>
 
             <div class="form-group">
@@ -384,13 +423,19 @@
     import Swal from 'sweetalert2';
     import { successToast, errorToast } from '@/utils/toast'
 
+    const props = defineProps({
+      showModal: Boolean,
+      editData: Object,
+    });
+
+    const isEditingUsername = ref(false);
+
     let availableApps = reactive([]);
     let availableRoles = reactive([]);
     let availableEntityTypes = reactive([]);
 
     let users = reactive([]);
     const totalUsers = ref(0);
-    const username = ref('');
 
     const search = ref('');
     const statusFilter = ref('');
@@ -416,110 +461,110 @@
     ];
 
     let formData = reactive({
-        username: '',
-        code: '',
-        full_name: '',
-        nickname: '',
-        email: '',
-        alt_email: '',
-        join_date: '',
-        title: '',
-        status: 'Aktif',
-        password: '',
-        password_confirmation: '',
-        app_access: [{ app_id: '', role_id: '', entity_type_id: '', entity_id: '' }],
+      username: '',
+      code: '',
+      full_name: '',
+      nickname: '',
+      email: '',
+      alt_email: '',
+      join_date: '',
+      title: '',
+      status: 'Aktif',
+      password: '',
+      password_confirmation: '',
+      app_access: [{ app_id: '', role_id: '', entity_type_id: '', entity_id: '' }],
     })
 
     let formDataChangePassword = reactive({
-        password: '',
-        password_confirmation: ''
+      password: '',
+      password_confirmation: ''
     })
 
     watch(showCreateModal, (newVal) => {
-        if (newVal) {
-          showModal.value = true;
-          showCreateModal.value = true;
-          isEditing.value = false;
-          resetFormData();
-        }
+      if (newVal) {
+        showModal.value = true;
+        showCreateModal.value = true;
+        isEditing.value = false;
+        resetFormData();
+      }
     });
 
     const fetchUsers = async () => {
-        try {
-            loading.value = true;
-            const params = {
-              search: search.value,
-              status: statusFilter.value,
-              page: currentPage.value,
-              limit: perPage.value,
-              sort: sortSelection.value
-            }
-
-            const response = await userService.getUsers(params);
-
-            users = response.data.data;
-            totalUsers.value = response.data.pagination.total;
-            currentPage.value = response.data.pagination.current_page;
-            lastPage.value = response.data.pagination.last_page;
-        } catch (error) {
-            console.error('Failed to fetch users:', error);
-            errorToast(error);
-        } finally {
-            loading.value = false;
+      try {
+        loading.value = true;
+        const params = {
+          search: search.value,
+          status: statusFilter.value,
+          page: currentPage.value,
+          limit: perPage.value,
+          sort: sortSelection.value
         }
+
+        const response = await userService.getUsers(params);
+
+        users = response.data.data;
+        totalUsers.value = response.data.pagination.total;
+        currentPage.value = response.data.pagination.current_page;
+        lastPage.value = response.data.pagination.last_page;
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+        errorToast(error);
+      } finally {
+        loading.value = false;
+      }
     }
 
     const impersonateUser = async (user) => {
-        const result = await Swal.fire({
-          title: 'Konfirmasi',
-          text: `Anda akan masuk sebagai pengguna ini?`,
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#d33',
-          cancelButtonColor: '#6c757d',
-          confirmButtonText: 'Ya, masuk!',
-          cancelButtonText: 'Batal'
-        });
+      const result = await Swal.fire({
+        title: 'Konfirmasi',
+        text: `Anda akan masuk sebagai pengguna ini?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, masuk!',
+        cancelButtonText: 'Batal'
+      });
 
-        if (result.isConfirmed) {
-            try {
-                // const response = await authService.impersonateUser(user.uuid);
-                // window.location.href = response.data.redirect_url;
-                // TODO
-                successToast('Berhasil masuk sebagai pengguna!');
-            } catch (error) {
-                errorToast(error);
-            }
+      if (result.isConfirmed) {
+        try {
+          // const response = await authService.impersonateUser(user.uuid);
+          // window.location.href = response.data.redirect_url;
+          // TODO
+          successToast('Berhasil masuk sebagai pengguna!');
+        } catch (error) {
+          errorToast(error);
         }
+      }
     }
 
     const showUser = async (user) => {
-        const result = await Swal.fire({
-          title: 'Detail Pengguna',
-          html: `<strong>Nama:</strong> ${user.full_name}<br>
-                 <strong>Nomor Induk:</strong> ${user.code}<br>
-                 <strong>Username:</strong> ${user.username}<br>
-                 <strong>Nama Panggilan:</strong> ${user.nickname}<br>
-                 <strong>Email:</strong> ${user.email}<br>
-                 <strong>Status:</strong> ${user.status}`,
-          icon: 'info',
-          showCloseButton: true,
-          confirmButtonText: 'Tutup'
-        });
+      const result = await Swal.fire({
+        title: 'Detail Pengguna',
+        html: `<strong>Nama:</strong> ${user.full_name}<br>
+                <strong>Nomor Induk:</strong> ${user.code}<br>
+                <strong>Username:</strong> ${user.username}<br>
+                <strong>Nama Panggilan:</strong> ${user.nickname}<br>
+                <strong>Email:</strong> ${user.email}<br>
+                <strong>Status:</strong> ${user.status}`,
+        icon: 'info',
+        showCloseButton: true,
+        confirmButtonText: 'Tutup'
+      });
     }
 
     const fetchRoles = async () => {
-        try {
-            const params = {
-              limit: 100,
-            }
-
-            const response = await roleService.getRoles(params);
-            availableRoles = response.data.data;
-        } catch (error) {
-            console.error('Failed to fetch roles:', error);
-            errorToast(error);
+      try {
+        const params = {
+          limit: 100,
         }
+
+        const response = await roleService.getRoles(params);
+        availableRoles = response.data.data;
+      } catch (error) {
+        console.error('Failed to fetch roles:', error);
+        errorToast(error);
+      }
     }
 
     const fetchApps = async () => {
@@ -546,17 +591,62 @@
       }
     }
 
-    const generateUsername = (user) => {
+    const autoGenerateUsername = async () => {
+      if (!formData.full_name) {
+        errorToast('Silakan isi nama lengkap terlebih dahulu');
+        return;
+      }
+      
       try {
-        const name = user.full_name;
-
-        const response = await userService.generateUsername(name);
-        username = response.data.data;
+        const response = await userService.generateUsername(formData.full_name);
+        formData.username = response.data.data;
       } catch (error) {
         console.error('Failed to generate username:', error);
         errorToast(error);
       }
     }
+
+    // Debounced function for handling full name input
+    const debouncedGenerateUsername = debounce(async () => {
+      if (formData.full_name && !isEditingUsername.value && !isEditing.value) {
+        await autoGenerateUsername();
+      }
+    }, 500);
+
+    // Handle full name input with debounce
+    const onFullNameInput = () => {
+      debouncedGenerateUsername();
+    };
+
+    // Load data if in edit mode
+    watch(() => props.editData, (newVal) => {
+      if (newVal) {
+        isEditing.value = true;
+        Object.assign(formData, newVal);
+      } else {
+        isEditing.value = false;
+        formData
+      }
+    }, { immediate: true });
+
+    // Reset form when modal is closed
+    watch(() => props.showModal, (isOpen) => {
+      if (!isOpen) {
+        if (!isEditing.value) {
+          formData
+        }
+        isEditingUsername.value = false;
+      }
+    }, { immediate: true });
+
+    const toggleEditUsername = () => {
+      isEditingUsername.value = !isEditingUsername.value;
+      
+      // If turning off edit mode and we're in create mode, regenerate username
+      if (!isEditingUsername.value && !isEditing.value && formData.full_name) {
+        autoGenerateUsername();
+      }
+    };
 
     const editUser = (user) => {
       loadUserData(user);
@@ -601,40 +691,41 @@
     }
 
     const changePasswordUser = (user) => {
-        showChangePasswordModal.value = true;
-        formDataChangePassword = {
-          username: user.username,
-          password: '',
-          password_confirmation: ''
-        }
+      showChangePasswordModal.value = true;
+      formDataChangePassword = {
+        username: user.username,
+        password: '',
+        password_confirmation: ''
+      }
     }
 
     const toggleStatus = async (user) => {
-        try {
-            let status = user.status == 'Aktif' ? 'Tidak Aktif' : 'Aktif';
-            await userService.updateUserStatus(user.uuid, { status: status });
-            user.status = status;
-        } catch (error) {
-            console.error('Failed to update user status:', error);
-            errorToast(error);
-        }
+      try {
+        let status = user.status == 'Aktif' ? 'Tidak Aktif' : 'Aktif';
+        await userService.updateUserStatus(user.uuid, { status: status });
+        user.status = status;
+      } catch (error) {
+        console.error('Failed to update user status:', error);
+        errorToast(error);
+      }
     }
 
     const handleSubmit = async () => {
-        try {
-            let response;
-            if (isEditing.value) {
-                response = await userService.updateUser(formData.uuid, formData);
-            } else {
-                response = await userService.createUser(formData);
-            }
-            await fetchUsers();
-            closeModal();
-            successToast(response.data?.message);
-        } catch (error) {
-            console.error('Failed to save user:', error);
-            errorToast(error);
+      try {
+        let response;
+        if (isEditing.value) {
+          response = await userService.updateUser(formData.uuid, formData);
+        } else {
+          response = await userService.createUser(formData);
         }
+
+        await fetchUsers();
+        closeModal();
+        successToast(response.data?.message);
+      } catch (error) {
+        console.error('Failed to save user:', error);
+        errorToast(error);
+      }
     }
 
     const handleChangePassword = async () => {
@@ -666,19 +757,20 @@
     }
 
     const closeChangePasswordModal = () => {
-        showChangePasswordModal.value = false;
-        formDataChangePassword = {
-            password: '',
-            password_confirmation: ''
-        }
+      showChangePasswordModal.value = false;
+      formDataChangePassword = {
+        password: '',
+        password_confirmation: ''
+      }
     }
 
     const closeModal = () => {
-        showModal.value = false;
-        showCreateModal.value = false;
-        showEditModal.value = false;
-        isEditing.value = false;
-        resetFormData();
+      showModal.value = false;
+      showCreateModal.value = false;
+      showEditModal.value = false;
+      isEditing.value = false;
+      isEditingUsername.value = false;
+      resetFormData();
     }
 
     const addUserRole = () => {
@@ -694,7 +786,7 @@
       formData.app_access.splice(index, 1)
     }
 
-    const resetFormData = () => {
+    const resetFormData = async () => {
       formData.username = ''
       formData.code = ''
       formData.full_name = ''
@@ -711,12 +803,12 @@
     
     /* start: filter, search and pagination */
     const debouncedFetchUsers = debounce(() => {
-        currentPage.value = 1;
-        fetchUsers();
+      currentPage.value = 1;
+      fetchUsers();
     }, 300);
 
     const handleSearch = () => {
-        debouncedFetchUsers();
+      debouncedFetchUsers();
     }
 
     watch(statusFilter, (newStatus) => {
@@ -747,8 +839,8 @@
     }
 
     const handleLimitChange = () => {
-        currentPage.value = 1;
-        fetchUsers();
+      currentPage.value = 1;
+      fetchUsers();
     }
     /* end: filter, search and pagination */
 
@@ -914,6 +1006,103 @@
 
 .btn-delete:hover {
   background-color: #b02a37;
+}
+
+/* Style for read-only inputs in form-group */
+.form-group input[readonly] {
+  background-color: #f8f9fa;
+  border: 1px solid #ced4da;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Username input group styling */
+.username-input-group {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.username-input-group input {
+  flex: 1;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Button base styles */
+.username-input-group button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: auto;
+  border: 1px solid #ced4da;
+  background-color: #e9ecef;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Generate button styling */
+.username-input-group .btn-generate {
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+}
+
+/* Edit button styling */
+.username-input-group .btn-edit {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
+}
+
+/* Active state for edit button */
+.username-input-group .btn-edit.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+/* Hover states */
+.username-input-group .btn-generate:hover,
+.username-input-group .btn-edit:hover {
+  background-color: #dde2e6;
+}
+
+.username-input-group .btn-edit.active:hover {
+  background-color: #0069d9;
+}
+
+/* Disabled state */
+.username-input-group button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.username-input-group button {
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.username-input-group .btn-generate,
+.username-input-group .btn-edit {
+  width: 40px;
+}
+
+/* Ensure input and buttons have consistent height */
+.username-input-group input,
+.username-input-group button {
+  height: 38px;
+}
+
+/* Responsive adjustments for small screens */
+@media (max-width: 576px) {
+  .username-input-group button {
+    padding: 0.25rem 0.5rem;
+  }
 }
 
 </style>

@@ -165,3 +165,33 @@
   outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
+
+/* Style for read-only inputs in form-group */
+.form-group input[readonly],
+.form-group textarea[readonly],
+.form-group select[readonly] {
+  background-color: #f8f9fa;
+  border: 1px solid #ced4da;
+  color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* Style for the entire form-group when containing read-only elements */
+.form-group.readonly {
+  opacity: 0.9;
+}
+
+/* Optional: Style for read-only labels */
+.form-group.readonly label {
+  color: #6c757d;
+}
+
+/* Optional: Add a read-only indicator */
+.form-group.readonly::after {
+  content: "(Read-only)";
+  font-size: 0.8em;
+  color: #6c757d;
+  margin-left: 8px;
+}
