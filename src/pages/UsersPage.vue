@@ -390,6 +390,7 @@
 
     let users = reactive([]);
     const totalUsers = ref(0);
+    const username = ref('');
 
     const search = ref('');
     const statusFilter = ref('');
@@ -522,27 +523,39 @@
     }
 
     const fetchApps = async () => {
-        try {
-            const params = {
-              limit: 100,
-            }
-
-            const response = await applicationService.getApplications(params);
-            availableApps = response.data.data;
-        } catch (error) {
-            console.error('Failed to fetch roles:', error);
-            errorToast(error);
+      try {
+        const params = {
+          limit: 100,
         }
+
+        const response = await applicationService.getApplications(params);
+        availableApps = response.data.data;
+      } catch (error) {
+        console.error('Failed to fetch roles:', error);
+        errorToast(error);
+      }
     }
 
     const fetchEntityTypes = async () => {
-        try {
-            const response = await roleService.getEntityTypes();
-            availableEntityTypes = response.data.data;
-        } catch (error) {
-            console.error('Failed to fetch roles:', error);
-            errorToast(error);
-        }
+      try {
+        const response = await roleService.getEntityTypes();
+        availableEntityTypes = response.data.data;
+      } catch (error) {
+        console.error('Failed to fetch roles:', error);
+        errorToast(error);
+      }
+    }
+
+    const generateUsername = (user) => {
+      try {
+        const name = user.full_name;
+
+        const response = await userService.generateUsername(name);
+        username = response.data.data;
+      } catch (error) {
+        console.error('Failed to generate username:', error);
+        errorToast(error);
+      }
     }
 
     const editUser = (user) => {
