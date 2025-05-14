@@ -283,10 +283,11 @@
                 :key="index"
                 class="akses-row"
               >
+              <div class="akses-grid">
                 <div class="form-group">
                   <label>Aplikasi</label>
                   <select v-model="access.app_id">
-                    <option value="">-- Pilih Aplikasi --</option>
+                    <option value="">Pilih Aplikasi</option>
                     <option v-for="app in availableApps" :key="app.id" :value="app.id">
                       {{ app.name }}
                     </option>
@@ -294,9 +295,9 @@
                 </div>
 
                 <div class="form-group">
-                  <label>Role</label>
+                  <label>Peran</label>
                   <select v-model="access.role_id">
-                    <option value="">-- Pilih Role --</option>
+                    <option value="">Pilih Peran</option>
                     <option v-for="role in availableRoles" :key="role.id" :value="role.id">
                       {{ role.display_name }}
                     </option>
@@ -306,37 +307,31 @@
                 <div class="form-group">
                   <label>Jenis Entitas</label>
                   <select v-model="access.entity_type_id">
-                    <option value="">(Opsional)</option>
-                    <option
-                      v-for="type in availableEntityTypes"
-                      :key="type.id"
-                      :value="type.id"
-                    >
+                    <option value="">Pilih Jenis Entitas</option>
+                    <option v-for="type in availableEntityTypes" :key="type.id" :value="type.id">
                       {{ type.name }}
                     </option>
                   </select>
                 </div>
 
-                <!-- Entity ID -->
                 <div class="form-group">
                   <label>Kode Entitas</label>
                   <input
                     type="text"
                     v-model="access.entity_id"
-                    placeholder="misal: 55201"
+                    placeholder="Misal: 55201"
                   />
                 </div>
 
-                <!-- Tombol hapus -->
-                <div class="form-group">
+                <div class="form-group btn-wrapper">
                   <label>&nbsp;</label>
                   <button type="button" @click="removeUserRole(index)" class="btn-delete">
                     <font-awesome-icon icon="trash" />
                   </button>
                 </div>
               </div>
+              </div>
 
-              <!-- Tombol Tambah -->
               <div style="margin-top: 10px">
                 <button type="button" @click="addUserRole" class="btn-add">
                   <font-awesome-icon icon="plus" />
@@ -352,11 +347,34 @@
         </form>
       </div>
     </div>
+
+    <!-- Modal Import Pengguna -->
+    <div v-if="false" class="modal-overlay">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <h2 class="modal-title">Impor Pengguna</h2>
+          <button type="button" class="modal-close" @click="false">
+            <span>&times;</span>
+          </button>
+        </div>
+
+        <form @submit.prevent="" class="modal-form">
+          <div class="modal-body">
+            
+          </div>
+          
+          <div class="modal-footer">
+            <button type="button" @click="false" class="btn btn-secondary">Batal</button>
+            <button type="submit" class="btn btn-success"><font-awesome-icon icon="save" />&nbsp; Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-    import { ref, computed, reactive, onMounted, watch } from 'vue';
+    import { ref, reactive, computed, onMounted, watch } from 'vue';
     import { authService } from '../api/services/authService';
     import { userService } from '../api/services/userService';
     import { applicationService } from '../api/services/applicationService';
@@ -396,7 +414,7 @@
       { label: 'Tidak Aktif', value: 'Tidak Aktif' },
     ];
 
-    const formData = reactive({
+    let formData = reactive({
         username: '',
         code: '',
         full_name: '',
@@ -409,12 +427,12 @@
         password: '',
         password_confirmation: '',
         app_access: [{ app_id: '', role_id: '', entity_type_id: '', entity_id: '' }],
-    });
+    })
 
-    const formDataChangePassword = reactive({
+    let formDataChangePassword = reactive({
         password: '',
         password_confirmation: ''
-    });
+    })
 
     watch(showCreateModal, (newVal) => {
         if (newVal) {
@@ -567,8 +585,6 @@
       });
 
       formData.app_access = mappedUserRoles ?? []
-
-      console.log(formData);
     }
 
     const changePasswordUser = (user) => {
@@ -609,31 +625,31 @@
     }
 
     const handleChangePassword = async () => {
-        const result = await Swal.fire({
-          title: 'Konfirmasi',
-          text: `Password pengguna akan diganti!`,
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#d33',
-          cancelButtonColor: '#6c757d',
-          confirmButtonText: 'Ya, ganti!',
-          cancelButtonText: 'Batal'
-        });
+      const result = await Swal.fire({
+        title: 'Konfirmasi',
+        text: `Password pengguna akan diganti!`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, ganti!',
+        cancelButtonText: 'Batal'
+      });
 
-        if (result.isConfirmed) {
-          try {
-            const response = await authService.changeUserPassword(
-              formDataChangePassword.username, 
-              formDataChangePassword.password, 
-              formDataChangePassword.password_confirmation
-            );
-            
-            successToast(response.data?.message);
-            closeChangePasswordModal();
-          } catch (error) {
-            errorToast(error.response.data.message);
-          }
+      if (result.isConfirmed) {
+        try {
+          const response = await authService.changeUserPassword(
+            formDataChangePassword.username, 
+            formDataChangePassword.password, 
+            formDataChangePassword.password_confirmation
+          );
+          
+          successToast(response.data?.message);
+          closeChangePasswordModal();
+        } catch (error) {
+          errorToast(error.response.data.message);
         }
+      }
     }
 
     const closeChangePasswordModal = () => {
@@ -850,6 +866,18 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   background-color: #fafafa;
+}
+
+.akses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.btn-wrapper {
+  display: flex;
+  align-items: flex-end;
 }
 
 .btn-add,

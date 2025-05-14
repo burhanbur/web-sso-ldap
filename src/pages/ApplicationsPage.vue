@@ -54,13 +54,13 @@
                 <span class="badge platform">{{ app.platform_type }}</span>
                 <span class="badge visibility">{{ app.visibility }}</span>
                 <span :class="['badge', 'status', app.is_active ? 'active' : 'inactive']">
-                  {{ app.is_active ? 'Active' : 'Inactive' }}
+                  {{ app.is_active ? 'Aktif' : 'Tidak Aktif' }}
                 </span>
               </div>
             </div>
           </div>
           <div class="app-description">
-            <p class="description">{{ app.description || 'No description' }}</p>
+            <p class="description">{{ app.description || 'Tidak ada deskripsi' }}</p>
           </div>
           <div class="app-urls">
             <a :href="app.base_url" target="_blank" class="url">{{ app.base_url }}</a>
@@ -134,13 +134,13 @@
           <form @submit.prevent="handleSubmit" class="modal-form">
             <div class="modal-body">
               <div class="form-group">
-                <label for="code">Code</label>
+                <label for="code">Kode</label>
                 <input type="text" id="code" v-model="formData.code" required maxlength="50" 
                       :disabled="isEditing" placeholder="unique-app-code" />
               </div>
     
               <div class="form-group">
-                <label for="name">Name</label>
+                <label for="name">Nama Aplikasi</label>
                 <input type="text" id="name" v-model="formData.name" required maxlength="255" 
                       placeholder="Application Name" />
               </div>
@@ -152,7 +152,7 @@
               </div>
     
               <div class="form-group">
-                <label for="description">Description (Optional)</label>
+                <label for="description">Deskripsi (Optional)</label>
                 <textarea id="description" v-model="formData.description" rows="3" 
                           placeholder="Application description"></textarea>
               </div>
@@ -170,7 +170,7 @@
               </div>
     
               <div class="form-group">
-                <label for="platform_type">Platform Type</label>
+                <label for="platform_type">Tipe Platform</label>
                 <select id="platform_type" v-model="formData.platform_type" required>
                   <option value="Web">Web</option>
                   <option value="Mobile">Mobile</option>
@@ -179,11 +179,10 @@
               </div>
     
               <div class="form-group">
-                <label for="visibility">Visibility</label>
+                <label for="visibility">Visibilitas</label>
                 <select id="visibility" v-model="formData.visibility" required>
-                  <option value="Public">Public</option>
-                  <option value="Private">Private</option>
                   <option value="Internal">Internal</option>
+                  <option value="Public">Public</option>
                 </select>
               </div>
     
@@ -204,13 +203,13 @@
 </template>
 
 <script setup>
-    import { ref, computed, onMounted, watch } from 'vue';
+    import { ref, reactive, computed, onMounted, watch } from 'vue';
     import { applicationService } from '../api/services/applicationService';
     import debounce from 'lodash/debounce';
     import Swal from 'sweetalert2';
     import { successToast, errorToast } from '@/utils/toast'
 
-    const applications = ref([]);
+    let applications = reactive([]);
     const totalApplications = ref(0);
 
     const search = ref('');
@@ -230,158 +229,167 @@
       { label: 'Tidak Aktif', value: '0' },
     ];
 
-    const formData = ref({
-        code: '',
-        name: '',
-        alias: '',
-        description: '',
-        base_url: '',
-        login_url: '',
-        platform_type: 'Web',
-        visibility: 'Public',
-        is_active: 1,
-        image: null
-    });
+    let formData = reactive({
+      code: '',
+      name: '',
+      alias: '',
+      description: '',
+      base_url: '',
+      login_url: '',
+      platform_type: 'Web',
+      visibility: 'Internal',
+      is_active: 1,
+      image: null
+    })
 
     watch(showCreateModal, (newVal) => {
-        if (newVal) {
-          showCreateModal.value = true;
-          showModal.value = false;
-          isEditing.value = false;
-          formData
-        }
-    });
+      if (newVal) {
+        showCreateModal.value = true;
+        showModal.value = false;
+        isEditing.value = false;
+        formData
+      }
+    })
 
     const fetchApplications = async () => {
-        try {
-            loading.value = true;
-            const params = {
-              search: search.value,
-              is_active: statusFilter.value.value,
-              page: currentPage.value,
-              limit: perPage.value,
-              sort: sortSelection.value
-            }
+      try {
+          loading.value = true;
+          const params = {
+            search: search.value,
+            is_active: statusFilter.value.value,
+            page: currentPage.value,
+            limit: perPage.value,
+            sort: sortSelection.value
+          }
 
-            const response = await applicationService.getApplications(params);
-            applications.value = response.data.data;
+          const response = await applicationService.getApplications(params);
+          applications = response.data.data;
 
-            totalApplications.value = response.data.pagination.total;
-            currentPage.value = response.data.pagination.current_page;
-            lastPage.value = response.data.pagination.last_page;
-        } catch (error) {
-            console.error('Failed to fetch applications:', error);
-            errorToast(error);
-        } finally {
-            loading.value = false;
-        }
-    };
+          totalApplications.value = response.data.pagination.total;
+          currentPage.value = response.data.pagination.current_page;
+          lastPage.value = response.data.pagination.last_page;
+      } catch (error) {
+          console.error('Failed to fetch applications:', error);
+          errorToast(error);
+      } finally {
+          loading.value = false;
+      }
+    }
 
     const handleImageUpload = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            formData.value.image = file;
-        }
-    };
+      const file = event.target.files[0];
+      if (file) {
+        formData.value.image = file;
+      }
+    }
 
     const editApplication = (app) => {
-        isEditing.value = true;
-        formData.value = {
-            ...app,
-            image: null
-        };
-        showModal.value = true;
-    };
+      loadData(app);
+      isEditing.value = true;
+      showModal.value = true;
+    }
+
+    const loadData = (app) => {
+      formData.id = app.id
+      formData.uuid = app.uuid
+      formData.code = app.code
+      formData.name = app.name
+      formData.alias = app.alias
+      formData.description = app.description
+      formData.base_url = app.base_url
+      formData.login_url = app.login_url
+      formData.platform_type = app.platform_type
+      formData.visibility = app.visibility
+      formData.is_active = app.is_active
+      formData.image = app.image
+    }
 
     const toggleStatus = async (app) => {
-        try {
-            await applicationService.updateStatus(app.uuid);
-            await fetchApplications();
-        } catch (error) {
-            console.error('Failed to toggle application status:', error);
-            errorToast(error);
-        }
-    };
+      try {
+        await applicationService.updateStatus(app.uuid);
+        await fetchApplications();
+      } catch (error) {
+        console.error('Failed to toggle application status:', error);
+        errorToast(error);
+      }
+    }
 
     const deleteApplication = async (uuid) => {
-        if (confirm('Are you sure you want to delete this application?')) {
-            try {
-                const response = await applicationService.deleteApplication(uuid);
-                await fetchApplications();
-                successToast(response.data.message)
-            } catch (error) {
-                console.error('Failed to delete application:', error);
-                errorToast(error);
-            }
+      const result = await Swal.fire({
+        title: 'Konfirmasi',
+        text: `Apakah yakin ingin menghapus data ini?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, yakin!',
+        cancelButtonText: 'Batal'
+      });
+
+      if (result.isConfirmed) {
+        try {          
+          const response = await applicationService.deleteApplication(uuid);
+          await fetchApplications();
+          successToast(response.data.message)
+        } catch (error) {
+          errorToast(error.response.data.message);
         }
-    };
+      }
+    }
 
     const handleSubmit = async () => {
-        try {
-            const data = new FormData();
-            Object.keys(formData.value).forEach(key => {
-                if (formData.value[key] !== null) {
-                    data.append(key, formData.value[key]);
-                }
-            });
-
-            let response;
-            if (isEditing.value) {
-                response = await applicationService.updateApplication(formData.value.uuid, data);
-            } else {
-                response = await applicationService.createApplication(data);
+      try {
+        let data = new FormData();
+        Object.keys(formData).forEach(key => {
+            if (formData[key] !== null) {
+                data.append(key, formData[key]);
             }
-            await fetchApplications();
-            closeModal();
-            successToast(response.data.message);
-        } catch (error) {
-            console.error('Failed to save application:', error);
-            errorToast(error);
+        });
+
+        let response;
+        if (isEditing.value) {
+            response = await applicationService.updateApplication(formData.uuid, data);
+        } else {
+            response = await applicationService.createApplication(data);
         }
-    };
+        await fetchApplications();
+        closeModal();
+        successToast(response.data.message);
+      } catch (error) {
+          console.error('Failed to save application:', error);
+          errorToast(error);
+      }
+    }
 
     const closeModal = () => {
-        showModal.value = false;
-        showCreateModal.value = false;
-        isEditing.value = false;
-        formData.value = {
-            code: '',
-            name: '',
-            alias: '',
-            description: '',
-            base_url: '',
-            login_url: '',
-            platform_type: 'Web',
-            visibility: 'Public',
-            is_active: true,
-            image: null
-        };
-    };
+      showModal.value = false;
+      showCreateModal.value = false;
+      isEditing.value = false;
+      resetFormData();
+    }
 
     // Handle Search (Debounced)
     const debouncedFetchData = debounce(() => {
-        currentPage.value = 1;
-        fetchApplications();
+      currentPage.value = 1;
+      fetchApplications();
     }, 300);
 
     const handleSearch = () => {
-        debouncedFetchData();
-    };
+      debouncedFetchData();
+    }
 
-    const resetFormData = () => {
-      formData.value = {
-          code: '',
-          name: '',
-          alias: '',
-          description: '',
-          base_url: '',
-          login_url: '',
-          platform_type: 'Web',
-          visibility: 'Public',
-          is_active: true,
-          image: null
-      };
-    };
+    const resetFormData = () => {      
+      formData.code = ''
+      formData.name = ''
+      formData.alias = ''
+      formData.description = ''
+      formData.base_url = ''
+      formData.login_url = ''
+      formData.platform_type = 'Web'
+      formData.visibility = 'Internal'
+      formData.is_active = true
+      formData.image = null
+    }
 
     watch(statusFilter, (newStatus) => {
       handleFilter(newStatus)
@@ -411,12 +419,12 @@
     }
 
     const handleLimitChange = () => {
-        currentPage.value = 1;
-        fetchApplications();
-    };
+      currentPage.value = 1;
+      fetchApplications();
+    }
 
     onMounted(() => {
-        fetchApplications();
+      fetchApplications();
     });
 </script>
 
