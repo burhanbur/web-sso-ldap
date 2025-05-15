@@ -25,6 +25,7 @@ import {
   faUpload,
   faDownload,
   faSync,
+  faFileUpload,
   faTimes
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -55,5 +56,6 @@ library.add(
   faUpload,
   faDownload,
   faSync,
+  faFileUpload,
   faTimes
 );

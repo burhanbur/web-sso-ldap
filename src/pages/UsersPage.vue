@@ -198,6 +198,18 @@
         <form @submit.prevent="handleSubmit" class="modal-form">
           <div class="modal-body">
             <div class="form-group">
+              <label for="full_name">Nama Lengkap</label>
+              <input 
+                type="text" 
+                id="full_name" 
+                placeholder="Nama lengkap pengguna" 
+                v-model="formData.full_name" 
+                required 
+                @input="onFullNameInput"
+              />
+            </div>
+
+            <div class="form-group">
               <label for="username">Username</label>
               <div class="username-input-group">
                 <input 
@@ -232,18 +244,6 @@
                 </button>
               </div>
               <small class="form-text text-muted">{{ isEditing ? 'Klik ikon edit untuk mengubah username' : 'Username akan digenerate otomatis, atau klik ikon edit untuk custom' }}</small>
-            </div>
-
-            <div class="form-group">
-              <label for="full_name">Nama Lengkap</label>
-              <input 
-                type="text" 
-                id="full_name" 
-                placeholder="Nama lengkap pengguna" 
-                v-model="formData.full_name" 
-                required 
-                @input="onFullNameInput"
-              />
             </div>
 
             <div class="form-group">
@@ -388,22 +388,54 @@
     </div>
 
     <!-- Modal Import Pengguna -->
-    <div v-if="false" class="modal-overlay">
-      <div class="modal modal-lg">
+    <div v-if="showImportModal" class="modal-overlay">
+      <div class="modal modal-xl">
         <div class="modal-header">
           <h2 class="modal-title">Impor Pengguna</h2>
-          <button type="button" class="modal-close" @click="false">
+          <button type="button" class="modal-close" @click="closeModal">
             <span>&times;</span>
           </button>
         </div>
 
-        <form @submit.prevent="" class="modal-form">
+        <form @submit.prevent="importUser" class="modal-form">
           <div class="modal-body">
-            
+            <div class="form-group file-upload">
+              <label for="file">File Excel</label>
+              
+              <div class="custom-file-input">
+                <input
+                  type="file"
+                  id="file"
+                  accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                  @change="onFileChange"
+                  required
+                />
+                <span class="file-label">
+                  <font-awesome-icon icon="file-upload" class="upload-icon" />
+                  {{ fileName }}
+                </span>
+              </div>
+
+              <div v-if="previewData.length > 0" class="excel-preview">
+                <h4>Pratinjau Data</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th v-for="(header, idx) in previewData[0]" :key="idx">{{ header }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(row, i) in previewData.slice(1)" :key="i">
+                      <td v-for="(cell, j) in row" :key="j">{{ cell }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
           
           <div class="modal-footer">
-            <button type="button" @click="false" class="btn btn-secondary">Batal</button>
+            <button type="button" @click="closeModal" class="btn btn-secondary">Batal</button>
             <button type="submit" class="btn btn-success"><font-awesome-icon icon="save" />&nbsp; Simpan</button>
           </div>
         </form>
@@ -422,13 +454,13 @@
     import defaultAvatar from '../assets/img/default.png';
     import Swal from 'sweetalert2';
     import { successToast, errorToast } from '@/utils/toast'
+    import * as XLSX from 'xlsx'
 
     const props = defineProps({
       showModal: Boolean,
       editData: Object,
     });
 
-    const isEditingUsername = ref(false);
 
     let availableApps = reactive([]);
     let availableRoles = reactive([]);
@@ -450,10 +482,42 @@
     const showChangePasswordModal = ref(false);
     const showCreateModal = ref(false);
     const showEditModal = ref(false);
+    const showImportModal = ref(false);
+
     const isEditing = ref(false);
+    const isEditingUsername = ref(false);
 
     const showPassword = ref(false);
     const showPasswordConfirmation = ref(false);
+
+    const file = ref(null);
+    const fileName = ref('Pilih file Excel...');
+    const previewData = ref([]);
+
+    const onFileChange = async (e) => {
+      const file = e.target.files[0]
+      if (!file) return
+
+      fileName.value = file ? file.name : 'Pilih file Excel...'
+
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        const data = new Uint8Array(event.target.result)
+        const workbook = XLSX.read(data, { type: 'array' })
+
+        const sheetName = workbook.SheetNames[0]
+        const sheet = workbook.Sheets[sheetName]
+
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+        previewData.value = jsonData
+      }
+
+      reader.readAsArrayBuffer(file)
+    }
+
+    const importUser = async () => {
+      
+    }
 
     const statusOptions = [
       { label: 'Aktif', value: 'Aktif' },
@@ -770,6 +834,8 @@
       showModal.value = false;
       showCreateModal.value = false;
       showEditModal.value = false;
+      showImportModal.value = false;
+
       isEditing.value = false;
       isEditingUsername.value = false;
       resetFormData();
@@ -1107,4 +1173,21 @@
   }
 }
 
+.excel-preview {
+  margin-top: 1rem;
+  overflow-x: auto;
+}
+
+.excel-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.excel-preview th,
+.excel-preview td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
 </style>

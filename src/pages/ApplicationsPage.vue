@@ -139,7 +139,7 @@
             <div class="form-group">
               <label for="code">Kode</label>
               <input type="text" id="code" v-model="formData.code" required maxlength="50" 
-                    :disabled="isEditing" placeholder="unique-app-code" />
+                    :disabled="isEditing" :readonly="isEditing" placeholder="unique-app-code" />
             </div>
   
             <div class="form-group">
@@ -189,9 +189,17 @@
               </select>
             </div>
   
-            <div class="form-group">
+            <div class="form-group file-upload">
               <label for="image">Logo (Optional)</label>
-              <input type="file" id="image" @change="handleImageUpload" accept="image/png,image/jpeg,image/jpg" />
+              
+              <div class="custom-file-input">
+                <input type="file" id="image" @change="handleImageUpload" accept="image/png,image/jpeg,image/jpg" />
+                
+                <span class="file-label">
+                  <font-awesome-icon icon="file-upload" class="upload-icon" />
+                  {{ fileName }}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -386,7 +394,7 @@
       platform_type: 'Web',
       visibility: 'Internal',
       is_active: 1,
-      image: null
+      image: ''
     })
 
     watch(showCreateModal, (newVal) => {
@@ -423,10 +431,12 @@
       }
     }
 
+    const fileName = ref('Pilih logo...');
     const handleImageUpload = (event) => {
       const file = event.target.files[0];
       if (file) {
-        formData.value.image = file;
+        formData.image = file;
+        fileName.value = file ? file.name : 'Pilih logo...'
       }
     }
 
@@ -548,6 +558,7 @@
       showCreateModal.value = false;
       showUserAppModal.value = false;
       isEditing.value = false;
+      fileName.value = 'Pilih logo...';
       resetFormData();
     }
 
