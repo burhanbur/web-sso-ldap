@@ -52,13 +52,13 @@
                     </button>
                 </form>
 
-                <div v-if="errorMsg" class="error-message">
+                <!-- <div v-if="errorMsg" class="error-message">
                     {{ errorMsg }}
                 </div>
 
                 <div v-if="successMsg" class="success-message">
                     {{ successMsg }}
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
@@ -68,6 +68,7 @@
     import { ref, onMounted } from 'vue';
     import { useRouter, useRoute } from 'vue-router';
     import { authService } from '../api/services/authService';
+    import { successToast, errorToast, warningToast } from '@/utils/toast'
 
     const router = useRouter();
     const route = useRoute();
@@ -83,6 +84,11 @@
         try {
             loading.value = true;
             const response = await authService.login(username.value, password.value);
+            console.log(response);
+
+            if (!response) {
+                throw new Error('Login failed');
+            }
 
             if (!response.data.access_token) {
                 throw new Error('Login failed');
@@ -91,11 +97,13 @@
             localStorage.setItem('access_token', response.data.access_token);
             router.push('/dashboard');
         } catch (error) {
-            errorMsg.value = error.response?.message || 'Invalid username or password';
+            // errorToast(error)
+            // console.error('Login error stack:', error.stack)
+            errorMsg.value = error || 'Invalid username or password';
         } finally {
             loading.value = false;
         }
-    };
+    }
 
     onMounted(() => {
         const msg = sessionStorage.getItem('successMsg');

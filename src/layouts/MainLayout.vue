@@ -31,11 +31,17 @@
                         <span>Peran Pengguna</span>
                     </router-link> -->
                 </nav>
-                <div class="user-menu">
-                    <button @click="logout" class="logout-btn">
-                        <font-awesome-icon icon="sign-out-alt" />
-                        <span>Logout</span>
+                <div class="user-menu" @click="toggleUserMenu">
+                    <button class="user-menu-btn">
+                        <font-awesome-icon icon="user-circle" /> &nbsp; {{ user.full_name }}
                     </button>
+                    <div v-if="showUserMenu" class="user-dropdown">
+                        <button v-if="!isImpersonating" class="dropdown-item" @click="leaveImpersonation">
+                            <font-awesome-icon icon="user-secret" /> &nbsp; Keluar Impersonasi
+                        </button>
+                        <router-link to="/profile" class="dropdown-item" active-class="active"><font-awesome-icon icon="user" /> &nbsp; Profil</router-link>
+                        <button @click.stop="logout" class="dropdown-item logout"><font-awesome-icon icon="sign-out-alt" /> &nbsp; Keluar</button>
+                    </div>
                 </div>
             </div>
         </header>
@@ -61,24 +67,65 @@
 <script setup>
     import { useRouter } from 'vue-router';
     import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-    import { ref } from 'vue';
+    import { ref, onMounted, onBeforeUnmount } from 'vue';
     import { authService } from '../api/services/authService';
+    import { successToast, errorToast, warningToast } from '@/utils/toast'
 
+    const user = ref([]);
     const router = useRouter();
     const isMenuOpen = ref(false);
+    const showUserMenu = ref(false);
+    const isImpersonating = ref(localStorage.getItem('impersonated_by'));
+
+    const me = async () => {
+        const response = await authService.me();
+        user.value = response.data.data;
+    }
 
     const logout = async () => {
         const logout = await authService.logout();
 
         if (logout.data.success) {
             localStorage.removeItem('access_token');
+            localStorage.removeItem('impersonated_by');
+            successToast(logout.data.message);
             router.push('/login');
         }
-    };
+    }
+
+    const leaveImpersonation = async () => {
+        try {
+            const response = await authService.leaveImpersonateUser();
+            localStorage.removeItem('impersonated_by');
+            localStorage.setItem('access_token', response.data.access_token);
+            router.push('/dashboard');
+        } catch (error) {
+            console.error('Failed to leave impersonation:', error);
+            errorToast(error);
+        }
+    }
 
     const toggleMenu = () => {
         isMenuOpen.value = !isMenuOpen.value;
-    };
+    }
+
+    const toggleUserMenu = () => {
+        showUserMenu.value = !showUserMenu.value;
+    }
+
+    const closeUserMenu = (e) => {
+        const menu = e.target.closest('.user-menu')
+        if (!menu) showUserMenu.value = false
+    }
+
+    onMounted(() => {
+        document.addEventListener('click', closeUserMenu)
+        me();
+    })
+
+    onBeforeUnmount(() => {
+        document.removeEventListener('click', closeUserMenu)
+    })
 </script>
 
 <style scoped>
@@ -257,6 +304,51 @@
         .main-content {
             padding: 1rem;
         }
+    }
+
+    .user-menu {
+      position: relative;
+    }
+
+    .user-menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 1.0rem;
+      cursor: pointer;
+    }
+
+    .user-dropdown {
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      min-width: 200px;
+    }
+
+    .dropdown-item {
+      padding: 1rem 1rem;
+      text-align: left;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .dropdown-item:hover {
+      background-color: var(--hover);
+    }
+
+    .dropdown-item.logout {
+      color: var(--error);
     }
 </style>
 <style scoped>

@@ -1,6 +1,7 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { 
   faHome,
+  faUser,
   faUsers,
   faWindowRestore,
   faUserShield,
@@ -26,12 +27,14 @@ import {
   faDownload,
   faSync,
   faFileUpload,
-  faTimes
+  faUserCircle,
+  faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 
 // Add icons to the library
 library.add(
   faHome,
+  faUser,
   faUsers,
   faWindowRestore,
   faUserShield,
@@ -57,5 +60,6 @@ library.add(
   faDownload,
   faSync,
   faFileUpload,
-  faTimes
+  faUserCircle,
+  faTimes,
 );

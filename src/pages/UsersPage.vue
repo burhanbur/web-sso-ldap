@@ -401,6 +401,15 @@
           <div class="modal-body">
             <div class="form-group file-upload">
               <label for="file">File Excel</label>
+
+              <!-- buatkan link download template di sini `public/template.xlsx` -->
+              <a 
+                href="/template.xlsx" 
+                download 
+                class="btn-download-template"
+              >
+                📥 Download Template Excel
+              </a>
               
               <div class="custom-file-input">
                 <input
@@ -446,6 +455,7 @@
 
 <script setup>
     import { ref, reactive, computed, onMounted, watch } from 'vue';
+    import { useRouter, useRoute } from 'vue-router';
     import { authService } from '../api/services/authService';
     import { userService } from '../api/services/userService';
     import { applicationService } from '../api/services/applicationService';
@@ -453,7 +463,7 @@
     import debounce from 'lodash/debounce';
     import defaultAvatar from '../assets/img/default.png';
     import Swal from 'sweetalert2';
-    import { successToast, errorToast } from '@/utils/toast'
+    import { successToast, errorToast, warningToast } from '@/utils/toast'
     import * as XLSX from 'xlsx'
 
     const props = defineProps({
@@ -461,6 +471,8 @@
       editData: Object,
     });
 
+    const route = useRoute();
+    const router = useRouter();
 
     let availableApps = reactive([]);
     let availableRoles = reactive([]);
@@ -495,28 +507,47 @@
     const previewData = ref([]);
 
     const onFileChange = async (e) => {
-      const file = e.target.files[0]
-      if (!file) return
+      const uploadFile = e.target.files[0]
+      if (!uploadFile) return
 
-      fileName.value = file ? file.name : 'Pilih file Excel...'
+      file.value = uploadFile;
+      fileName.value = uploadFile ? uploadFile.name : 'Pilih file Excel...'
 
       const reader = new FileReader()
       reader.onload = (event) => {
         const data = new Uint8Array(event.target.result)
         const workbook = XLSX.read(data, { type: 'array' })
-
         const sheetName = workbook.SheetNames[0]
         const sheet = workbook.Sheets[sheetName]
-
         const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 })
         previewData.value = jsonData
       }
 
-      reader.readAsArrayBuffer(file)
+      reader.readAsArrayBuffer(uploadFile)
     }
 
     const importUser = async () => {
-      
+      if (!file.value) {
+        warningToast('Silakan pilih file Excel terlebih dahulu.')
+        return
+      }
+
+      const formData = new FormData()
+      formData.append('file', file.value)
+
+      try {
+        const response = await userService.importUser(formData);
+
+        successToast(response.data.message || 'Import berhasil!');
+
+        // Optionally reset
+        file.value = null
+        fileName.value = 'Pilih file Excel...'
+        previewData.value = []
+      } catch (error) {
+        console.log('Error:', error);
+        errorToast(error);
+      }
     }
 
     const statusOptions = [
@@ -592,10 +623,10 @@
 
       if (result.isConfirmed) {
         try {
-          // const response = await authService.impersonateUser(user.uuid);
-          // window.location.href = response.data.redirect_url;
-          // TODO
+          const response = await authService.startImpersonateUser(user.uuid);
+          console.log(response);
           successToast('Berhasil masuk sebagai pengguna!');
+          router.push('dashboard');
         } catch (error) {
           errorToast(error);
         }

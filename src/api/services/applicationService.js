@@ -21,5 +21,8 @@ export const applicationService = {
     },
     getUserApplication: (uuid) => {
         return api.get(`/applications/${uuid}/users`);
+    },
+    getMyApplications: () => {
+        return api.get(`/auth/me/applications`);
     }
 };

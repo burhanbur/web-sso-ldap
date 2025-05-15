@@ -7,17 +7,34 @@
       <section class="dashboard-section">
         <h2>🚀 Aplikasi Klien</h2>
         <div v-if="loadingApps" class="loading spinner-container"><div class="spinner"></div></div>
-        <div v-else class="applications-grid">
-          <div v-for="app in applications" :key="app.id" class="app-card">
-            <h3>
-              <router-link :to="`/applications/${app.login_url}`">{{ app.name }}</router-link>
-            </h3>
-            <p>{{ app.description }}</p>
+        <div v-if="applications.length === 0 && !loading" class="text-center">Tidak ada data yang ditemukan.</div>
+        <div v-else class="layout-grid">
+          <div v-for="app in applications" :key="app.id" class="card">
+            <router-link style="color: inherit;" :to="`/applications/${app.uuid}?url=${app.login_url}`">
+              <div class="app-content">
+                <img :src="/*app.image ||*/ '/favicon.png'" :alt="app.name" class="app-logo" />
+                  <div class="app-info">
+                    <h3>{{ app.name }}</h3>
+                    <p class="code">{{ app.code }}</p>
+                    <div class="badges">
+                      <span class="badge platform">{{ app.platform_type }}</span>
+                      <span class="badge visibility">{{ app.visibility }}</span>
+                      <span :class="['badge', 'status', app.is_active ? 'active' : 'inactive']">
+                        {{ app.is_active ? 'Aktif' : 'Tidak Aktif' }}
+                      </span>
+                    </div>
+                  </div>
+              </div>
+
+              <div class="app-description">
+                <p class="description">{{ app.description || 'Tidak ada deskripsi' }}</p>
+              </div>
+            </router-link>
           </div>
         </div>
       </section>
   
-      <section class="dashboard-section">
+      <!-- <section class="dashboard-section">
         <h2>🧑‍💻 Pengguna Terbaru</h2>
         <div v-if="loadingUsers" class="loading spinner-container"><div class="spinner"></div></div>
         <div v-else class="users-list">
@@ -28,7 +45,7 @@
             </div>
           </div>
         </div>
-      </section>
+      </section> -->
     </div>
   </template>
 
@@ -44,9 +61,8 @@ const loadingUsers = ref(true);
 
 const fetchApplications = async () => {
     try {
-        const response = await applicationService.getApplications();
+        const response = await applicationService.getMyApplications();
         applications.value = response.data.data;
-        console.log(applications);
     } catch (error) {
         console.error('Failed to fetch applications:', error);
     } finally {
@@ -105,37 +121,6 @@ onMounted(() => {
   color: #222;
 }
 
-.applications-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1rem;
-}
-
-.app-card {
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 10px;
-  border: 1px solid #eee;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.app-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.app-card h3 {
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
-}
-
-.app-card p {
-  color: #666;
-  font-size: 0.95rem;
-}
-
 .users-list {
   margin-top: 1rem;
   display: flex;
@@ -171,10 +156,101 @@ onMounted(() => {
   color: #888;
 }
 
-.loading {
-  text-align: center;
-  padding: 2rem;
-  font-size: 1rem;
-  color: #777;
+.app-content {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.app-logo {
+  width: 60px;
+  height: 90px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: #f0f0f0;
+  padding: 0.5rem;
+}
+
+.app-info h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.code {
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 0.2rem;
+  font-family: monospace;
+}
+
+.description {
+  margin-top: 0.5rem;
+  color: #555;
+  font-size: 0.9rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.badge.platform {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.badge.visibility {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.badge.status {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge.status.inactive {
+  background-color: #fafafa;
+  color: #616161;
+}
+
+.app-urls {
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.app-bottom {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.url {
+  color: #2196f3;
+  font-size: 0.85rem;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.url:hover {
+  text-decoration: underline;
 }
 </style>

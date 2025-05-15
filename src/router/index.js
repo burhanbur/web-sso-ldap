@@ -9,6 +9,7 @@ import UsersPage from '../pages/UsersPage.vue';
 import ApplicationsPage from '../pages/ApplicationsPage.vue';
 import RolesPage from '../pages/RolesPage.vue';
 import UserRolesPage from '../pages/UserRolesPage.vue';
+import ProfilePage from '../pages/ProfilePage.vue';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage.vue';
 import ResetPasswordPage from '../pages/ResetPasswordPage.vue';
 
@@ -62,6 +63,11 @@ const routes = [
                 path: 'roles',
                 name: 'roles',
                 component: RolesPage,
+            },
+            {
+                path: 'profile',
+                name: 'profile',
+                component: ProfilePage,
             },
             // {
             //     path: 'user-roles',

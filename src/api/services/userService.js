@@ -25,7 +25,11 @@ export const userService = {
     updateUserStatus: (uuid, status) => {
         return api.put(`/users/${uuid}/status`, status );
     },
-    importUser: (file) => {
-        return api.post('/users/import', { file: file});
+    importUser: (formData) => {
+        return api.post('/users/import', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
     },
 };

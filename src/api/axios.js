@@ -2,6 +2,7 @@ import axios from 'axios';
 import { authService } from './services/authService';
 import { useRouter } from 'vue-router';
 import { jwtDecode } from 'jwt-decode';
+import { successToast, errorToast, warningToast } from '@/utils/toast'
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
@@ -15,13 +16,13 @@ const api = axios.create({
 const router = useRouter();
 let lastActivity = Date.now();
 const INACTIVITY_TIMEOUT = 60 * 60 * 1000; // 60 minutes in milliseconds
-const TOKEN_REFRESH_THRESHOLD = 1 * 60; // Refresh token 5 minutes before expiry
+const TOKEN_REFRESH_THRESHOLD = 1 * 60 * 1000; // Refresh token 1 minutes before expiry
 
 // Token refresh state
 let isRefreshing = false;
 let refreshPromise = null;
 let lastTokenCheck = 0;
-const TOKEN_CHECK_INTERVAL = 60 * 1000; // Check token every minute
+const TOKEN_CHECK_INTERVAL = 1 * 60 * 1000; // Check token every minute
 
 // Track user activity
 const updateActivity = () => {
@@ -39,7 +40,9 @@ if (typeof window !== 'undefined') {
 
 // Refresh token handler
 const handleTokenRefresh = async () => {
-    if (!isRefreshing) {
+    const token = localStorage.getItem('access_token');
+
+    if (!isRefreshing && token) {
         isRefreshing = true;
         refreshPromise = authService.refreshToken()
             .then(response => {
@@ -59,6 +62,7 @@ const handleTokenRefresh = async () => {
                 refreshPromise = null;
             });
     }
+
     return refreshPromise;
 };
 
@@ -140,9 +144,16 @@ api.interceptors.response.use(
         originalRequest._retry = true;
 
         try {
+            if (originalRequest.url == '/auth/login') {
+                errorToast(error.response.data.message)
+            }
+
             const token = await handleTokenRefresh();
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            return api(originalRequest);
+
+            if (token) {
+                originalRequest.headers.Authorization = `Bearer ${token}`;
+                return api(originalRequest);
+            }
         } catch (refreshError) {
             return Promise.reject(refreshError);
         }

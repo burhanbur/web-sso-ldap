@@ -38,7 +38,10 @@ export const authService = {
     me: () => {
         return api.get('/auth/me');
     },
-    impersonateUser: (uuid) => {
-
+    startImpersonateUser: (uuid) => {
+        return api.post(`/auth/impersonate/start/${uuid}`);
+    },
+    leaveImpersonateUser: () => {
+        return api.post('/auth/impersonate/leave');
     }
 };
