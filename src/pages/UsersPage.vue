@@ -434,7 +434,7 @@
     let availableRoles = reactive([]);
     let availableEntityTypes = reactive([]);
 
-    let users = reactive([]);
+    const users = ref([]);
     const totalUsers = ref(0);
 
     const search = ref('');
@@ -502,7 +502,7 @@
 
         const response = await userService.getUsers(params);
 
-        users = response.data.data;
+        users.value = response.data.data;
         totalUsers.value = response.data.pagination.total;
         currentPage.value = response.data.pagination.current_page;
         lastPage.value = response.data.pagination.last_page;
@@ -701,9 +701,11 @@
 
     const toggleStatus = async (user) => {
       try {
-        let status = user.status == 'Aktif' ? 'Tidak Aktif' : 'Aktif';
-        await userService.updateUserStatus(user.uuid, { status: status });
-        user.status = status;
+        let newStatus = user.status == 'Aktif' ? 'Tidak Aktif' : 'Aktif';
+        await userService.updateUserStatus(user.uuid, { status: newStatus });
+        user.status = newStatus
+
+        successToast(`Status pengguna ${user.full_name} diubah menjadi ${newStatus}`);
       } catch (error) {
         console.error('Failed to update user status:', error);
         errorToast(error);

@@ -98,7 +98,7 @@
             <div class="form-group">
               <label for="name">Kode Unik</label>
               <input type="text" id="name" v-model="formData.name" required maxlength="255" 
-                      :disabled="isEditing" placeholder="role-system-name" />
+                      :disabled="isEditing" :readonly="isEditing" placeholder="role-system-name" />
             </div>
 
             <div class="form-group">
@@ -152,7 +152,6 @@
     import { successToast, errorToast } from '@/utils/toast'
 
     let roles = reactive([]);
-    let entityTypes = reactive([]);
     let roleTypes = reactive([]);
     let scopeTypes = reactive([]);
     
@@ -231,20 +230,20 @@
       }
     }
 
-    const editRole = (role) => {
+    const editRole = async (role) => {
       loadData(role);
       isEditing.value = true;
       showModal.value = true;
     }
 
-    const loadData = (role) => {
+    const loadData = async (role) => {
       formData.id = role.id
       formData.uuid = role.uuid
       formData.name = role.name
       formData.display_name = role.display_name
       formData.description = role.description
       formData.role_type_id = role.role_type_id || role.role_type?.id || ''
-      formData.scope_type_id = role.scope_type_id || role.scope_type_id?.id || ''
+      formData.scope_type_id = role.scope_type_id || role.scope_type?.id || ''
     }
 
     const deleteRole = async (uuid) => {
@@ -274,9 +273,9 @@
       try {
         let response;
         if (isEditing.value) {
-            response = await roleService.updateRole(formData.value.uuid, formData.value);
+            response = await roleService.updateRole(formData.uuid, formData);
         } else {
-            response = await roleService.createRole(formData.value);
+            response = await roleService.createRole(formData);
         }
         await fetchRoles();
         closeModal();

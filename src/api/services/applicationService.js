@@ -19,4 +19,7 @@ export const applicationService = {
     updateStatus: (uuid, status) => {
         return api.put(`/applications/${uuid}/status`, status );
     },
+    getUserApplication: (uuid) => {
+        return api.get(`/applications/${uuid}/users`);
+    }
 };

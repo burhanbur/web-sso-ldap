@@ -1,96 +1,99 @@
 <template>
-    <div class="layout-page">
-      <div class="header-page">
-        <h1>Manajemen Aplikasi Klien</h1>
-        <button @click="showCreateModal = true" class="create-btn">
-          <font-awesome-icon icon="plus" />
-        </button>
-      </div>
+  <div class="layout-page">
+    <div class="header-page">
+      <h1>Manajemen Aplikasi Klien</h1>
+      <button @click="showCreateModal = true" class="create-btn">
+        <font-awesome-icon icon="plus" />
+      </button>
+    </div>
+    
+    <!-- Search and Filter -->
+    <div class="toolbar">
+      <input 
+        v-model="search" 
+        @input="handleSearch"
+        type="text" 
+        placeholder="Cari nama aplikasi ..." 
+        class="toolbar-input"
+      />
       
-      <!-- Search and Filter -->
-      <div class="toolbar">
-        <input 
-          v-model="search" 
-          @input="handleSearch"
-          type="text" 
-          placeholder="Cari nama aplikasi ..." 
-          class="toolbar-input"
-        />
-        
-        <!-- <multiselect 
-          v-model="statusFilter"
-          :options="statusOptions"
-          :searchable="true"
-          :clear-on-select="false"
-          :close-on-select="true"
-          placeholder="Pilih Status"
-          label="label"
-          track-by="value"
-          class="toolbar-select"
-        /> -->
+      <!-- <multiselect 
+        v-model="statusFilter"
+        :options="statusOptions"
+        :searchable="true"
+        :clear-on-select="false"
+        :close-on-select="true"
+        placeholder="Pilih Status"
+        label="label"
+        track-by="value"
+        class="toolbar-select"
+      /> -->
 
-        <select id="sort" class="toolbar-select" v-model="sortSelection" @change="handleSortSelection">
-          <option value="name,asc">Nama Aplikasi (A-Z)</option>
-          <option value="name,desc">Nama Aplikasi (Z-A)</option>
-          <option value="code,asc">Kode (A-Z)</option>
-          <option value="code,desc">Kode (Z-A)</option>
-          <option value="is_active,asc">Status (Z-A)</option>
-          <option value="is_active,desc">Status (Z-A)</option>
-          <option value="created_at,desc">Terbaru</option>
-          <option value="created_at,asc">Terlama</option>
-        </select>
-      </div>
-  
-      <div v-if="loading" class="loading spinner-container"><div class="spinner"></div></div>
-      <div v-if="applications.length === 0 && !loading" class="text-center">Tidak ada data yang ditemukan.</div>
-      <div v-else class="layout-grid">
-        <div v-for="app in applications" :key="app.id" class="card">
-          <div class="app-content">
-            <img :src="/*app.image ||*/ '/favicon.png'" :alt="app.name" class="app-logo" />
-            <div class="app-info">
-              <h3>{{ app.name }}</h3>
-              <p class="code">{{ app.code }}</p>
-              <div class="badges">
-                <span class="badge platform">{{ app.platform_type }}</span>
-                <span class="badge visibility">{{ app.visibility }}</span>
-                <span :class="['badge', 'status', app.is_active ? 'active' : 'inactive']">
-                  {{ app.is_active ? 'Aktif' : 'Tidak Aktif' }}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div class="app-description">
-            <p class="description">{{ app.description || 'Tidak ada deskripsi' }}</p>
-          </div>
-          <div class="app-urls">
-            <a :href="app.base_url" target="_blank" class="url">{{ app.base_url }}</a>
-            <!-- <a :href="app.login_url" target="_blank" class="url">{{ app.login_url }}</a> -->
-          </div>
-          
-          <div class="app-bottom">
-            <div class="status-toggle">
-              <label class="switch">
-                <input type="checkbox" :checked="app.is_active ? true : false" @change="toggleStatus(app)" />
-                <span class="slider"></span>
-              </label>
-              <span class="status-text">{{ app.is_active ? 'Aktif' : 'Tidak Aktif' }}</span>
-            </div>
+      <select id="sort" class="toolbar-select" v-model="sortSelection" @change="handleSortSelection">
+        <option value="name,asc">Nama Aplikasi (A-Z)</option>
+        <option value="name,desc">Nama Aplikasi (Z-A)</option>
+        <option value="code,asc">Kode (A-Z)</option>
+        <option value="code,desc">Kode (Z-A)</option>
+        <option value="is_active,asc">Status (Z-A)</option>
+        <option value="is_active,desc">Status (Z-A)</option>
+        <option value="created_at,desc">Terbaru</option>
+        <option value="created_at,asc">Terlama</option>
+      </select>
+    </div>
 
-            <div class="data-actions">
-              <button @click="editApplication(app)" class="action-btn edit">
-                <font-awesome-icon icon="edit" />
-              </button>
-              <button @click="deleteApplication(app.uuid)" class="action-btn delete">
-                <font-awesome-icon icon="trash" />
-              </button>
+    <div v-if="loading" class="loading spinner-container"><div class="spinner"></div></div>
+    <div v-if="applications.length === 0 && !loading" class="text-center">Tidak ada data yang ditemukan.</div>
+    <div v-else class="layout-grid">
+      <div v-for="app in applications" :key="app.id" class="card">
+        <div class="app-content">
+          <img :src="/*app.image ||*/ '/favicon.png'" :alt="app.name" class="app-logo" />
+          <div class="app-info">
+            <h3>{{ app.name }}</h3>
+            <p class="code">{{ app.code }}</p>
+            <div class="badges">
+              <span class="badge platform">{{ app.platform_type }}</span>
+              <span class="badge visibility">{{ app.visibility }}</span>
+              <span :class="['badge', 'status', app.is_active ? 'active' : 'inactive']">
+                {{ app.is_active ? 'Aktif' : 'Tidak Aktif' }}
+              </span>
             </div>
           </div>
         </div>
+        <div class="app-description">
+          <p class="description">{{ app.description || 'Tidak ada deskripsi' }}</p>
+        </div>
+        <div class="app-urls">
+          <a :href="app.base_url" target="_blank" class="url">{{ app.base_url }}</a>
+          <!-- <a :href="app.login_url" target="_blank" class="url">{{ app.login_url }}</a> -->
+        </div>
+        
+        <div class="app-bottom">
+          <div class="status-toggle">
+            <label class="switch">
+              <input type="checkbox" :checked="app.is_active ? true : false" @change="toggleStatus(app)" />
+              <span class="slider"></span>
+            </label>
+            <span class="status-text">{{ app.is_active ? 'Aktif' : 'Tidak Aktif' }}</span>
+          </div>
+
+          <div class="data-actions">
+            <button @click="showUserApplication(app)" class="action-btn warning">
+              <font-awesome-icon icon="users" />
+            </button>
+            <button @click="editApplication(app)" class="action-btn edit">
+              <font-awesome-icon icon="edit" />
+            </button>
+            <button @click="deleteApplication(app.uuid)" class="action-btn delete">
+              <font-awesome-icon icon="trash" />
+            </button>
+          </div>
+        </div>
       </div>
+    </div>
 
-      <br>
+    <br>
 
-      <!-- Pagination -->
+    <!-- Pagination -->
     <div class="pagination-container">
       <div class="per-page-select">
         <select v-model="perPage" @change="handleLimitChange">
@@ -120,97 +123,201 @@
         <font-awesome-icon class="pagination-icon" icon="chevron-right" />
       </button>
     </div>
+
+    <!-- Modal Create/Update -->
+    <div v-if="showModal || showCreateModal" class="modal-overlay">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <h2>{{ isEditing ? 'Ubah Aplikasi' : 'Tambah Aplikasi' }}</h2>
+          <button type="button" class="modal-close" @click="closeModal">
+            <span>&times;</span>
+          </button>
+        </div>
+
+        <form @submit.prevent="handleSubmit" class="modal-form">
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="code">Kode</label>
+              <input type="text" id="code" v-model="formData.code" required maxlength="50" 
+                    :disabled="isEditing" placeholder="unique-app-code" />
+            </div>
   
-      <!-- Modal -->
-      <div v-if="showModal || showCreateModal" class="modal-overlay">
-        <div class="modal modal-lg">
-          <div class="modal-header">
-            <h2>{{ isEditing ? 'Ubah Aplikasi' : 'Tambah Aplikasi' }}</h2>
-            <button type="button" class="modal-close" @click="closeModal">
-              <span>&times;</span>
+            <div class="form-group">
+              <label for="name">Nama Aplikasi</label>
+              <input type="text" id="name" v-model="formData.name" required maxlength="255" 
+                    placeholder="Application Name" />
+            </div>
+  
+            <div class="form-group">
+              <label for="alias">Alias (Optional)</label>
+              <input type="text" id="alias" v-model="formData.alias" maxlength="50" 
+                    placeholder="Short name or alias" />
+            </div>
+  
+            <div class="form-group">
+              <label for="description">Deskripsi (Optional)</label>
+              <textarea id="description" v-model="formData.description" rows="3" 
+                        placeholder="Application description"></textarea>
+            </div>
+  
+            <div class="form-group">
+              <label for="base_url">Base URL</label>
+              <input type="url" id="base_url" v-model="formData.base_url" required 
+                    placeholder="https://example.com" />
+            </div>
+  
+            <div class="form-group">
+              <label for="login_url">Login URL</label>
+              <input type="url" id="login_url" v-model="formData.login_url" required 
+                    placeholder="https://example.com/login" />
+            </div>
+  
+            <div class="form-group">
+              <label for="platform_type">Tipe Platform</label>
+              <select id="platform_type" v-model="formData.platform_type" required>
+                <option value="Web">Web</option>
+                <option value="Mobile">Mobile</option>
+                <option value="Desktop">Desktop</option>
+              </select>
+            </div>
+  
+            <div class="form-group">
+              <label for="visibility">Visibilitas</label>
+              <select id="visibility" v-model="formData.visibility" required>
+                <option value="Internal">Internal</option>
+                <option value="Public">Public</option>
+              </select>
+            </div>
+  
+            <div class="form-group">
+              <label for="image">Logo (Optional)</label>
+              <input type="file" id="image" @change="handleImageUpload" accept="image/png,image/jpeg,image/jpg" />
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" @click="closeModal" class="btn btn-secondary">Batal</button>
+            <button type="submit" class="btn btn-success"><font-awesome-icon icon="save" /> &nbsp;{{ isEditing ? 'Ubah' : 'Simpan' }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Pengguna Application -->
+    <div v-if="showUserAppModal" class="modal-overlay">
+      <div class="modal modal-xl">
+        <div class="modal-header">
+          <h2 class="modal-title">Pengguna Aplikasi {{ appOpen }}</h2>
+          <button type="button" class="modal-close" @click="closeModal">
+            <span>&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Search Bar -->
+          <div class="search-container mb-3">
+            <input
+              type="text"
+              v-model="searchUserApp"
+              placeholder="Cari pengguna..."
+              class="form-control"
+            />
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th class="text-center" style="width: 10px;">No</th>
+                <th class="text-center">Kode</th>
+                <th class="text-center">Username</th>
+                <th class="text-center">Nama Lengkap</th>
+                <th class="text-center">Peran</th>
+                <th class="text-center">#</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="loading">
+                <td colspan="6" class="text-center">
+                  <div class="loading spinner-container"><div class="spinner"></div></div>
+                </td>
+              </tr>
+              <tr v-else-if="usersApp.length === 0">
+                <td colspan="6" class="text-center">Tidak ada data yang ditemukan.</td>
+              </tr>
+              <template v-else>
+                <template v-for="(group, groupIndex) in groupedUsers" :key="group.key">
+                  <tr v-for="(user, userIndex) in group.items" :key="user.uuid">
+                    <!-- Kolom No, Code, Username, Full Name dengan rowspan -->
+                    <td v-if="userIndex === 0" :rowspan="group.items.length" class="text-center">{{ groupIndex + 1 }}</td>
+                    <td v-if="userIndex === 0" :rowspan="group.items.length" class="text-center">{{ user.code }}</td>
+                    <td v-if="userIndex === 0" :rowspan="group.items.length" class="text-center">{{ user.username }}</td>
+                    <td v-if="userIndex === 0" :rowspan="group.items.length" class="text-center">{{ user.full_name }}</td>
+                    
+                    <!-- Kolom yang selalu muncul di setiap baris -->
+                    <td class="text-center">{{ user.role }}</td>
+                    <td class="text-center">
+                      <button class="btn btn-danger" @click="removeUserApp(user.uuid)">
+                        <font-awesome-icon icon="trash" />
+                      </button>
+                    </td>
+                  </tr>
+                </template>
+              </template>
+            </tbody>
+          </table>
+
+          <!-- Pagination -->
+          <div class="pagination-container">
+            <div class="per-page-select">
+              <select v-model="perPageUserApp" @change="handleLimitChangeUserApp">
+                <option :value="15">15</option>
+                <option :value="30">30</option>
+                <option :value="60">60</option>
+                <option :value="-1">Semua</option>
+              </select>
+            </div>
+
+            <button 
+              class="pagination-button" 
+              @click="prevPageUserApp" 
+              :disabled="currentPageUserApp === 1"
+            >
+              <font-awesome-icon class="pagination-icon" icon="chevron-left" />
+            </button>
+
+            <span class="pagination-text">Halaman {{ currentPageUserApp }} / {{ lastPageUserApp }}</span>
+
+            <button 
+              class="pagination-button" 
+              @click="nextPageUserApp" 
+              :disabled="currentPageUserApp === lastPageUserApp"
+            >
+              <font-awesome-icon class="pagination-icon" icon="chevron-right" />
             </button>
           </div>
 
-          <form @submit.prevent="handleSubmit" class="modal-form">
-            <div class="modal-body">
-              <div class="form-group">
-                <label for="code">Kode</label>
-                <input type="text" id="code" v-model="formData.code" required maxlength="50" 
-                      :disabled="isEditing" placeholder="unique-app-code" />
-              </div>
-    
-              <div class="form-group">
-                <label for="name">Nama Aplikasi</label>
-                <input type="text" id="name" v-model="formData.name" required maxlength="255" 
-                      placeholder="Application Name" />
-              </div>
-    
-              <div class="form-group">
-                <label for="alias">Alias (Optional)</label>
-                <input type="text" id="alias" v-model="formData.alias" maxlength="50" 
-                      placeholder="Short name or alias" />
-              </div>
-    
-              <div class="form-group">
-                <label for="description">Deskripsi (Optional)</label>
-                <textarea id="description" v-model="formData.description" rows="3" 
-                          placeholder="Application description"></textarea>
-              </div>
-    
-              <div class="form-group">
-                <label for="base_url">Base URL</label>
-                <input type="url" id="base_url" v-model="formData.base_url" required 
-                      placeholder="https://example.com" />
-              </div>
-    
-              <div class="form-group">
-                <label for="login_url">Login URL</label>
-                <input type="url" id="login_url" v-model="formData.login_url" required 
-                      placeholder="https://example.com/login" />
-              </div>
-    
-              <div class="form-group">
-                <label for="platform_type">Tipe Platform</label>
-                <select id="platform_type" v-model="formData.platform_type" required>
-                  <option value="Web">Web</option>
-                  <option value="Mobile">Mobile</option>
-                  <option value="Desktop">Desktop</option>
-                </select>
-              </div>
-    
-              <div class="form-group">
-                <label for="visibility">Visibilitas</label>
-                <select id="visibility" v-model="formData.visibility" required>
-                  <option value="Internal">Internal</option>
-                  <option value="Public">Public</option>
-                </select>
-              </div>
-    
-              <div class="form-group">
-                <label for="image">Logo (Optional)</label>
-                <input type="file" id="image" @change="handleImageUpload" accept="image/png,image/jpeg,image/jpg" />
-              </div>
-            </div>
-
-            <div class="modal-footer">
-              <button type="button" @click="closeModal" class="btn btn-secondary">Batal</button>
-              <button type="submit" class="btn btn-success"><font-awesome-icon icon="save" /> &nbsp;{{ isEditing ? 'Ubah' : 'Simpan' }}</button>
-            </div>
-          </form>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" @click="closeModal" class="btn btn-secondary">Tutup</button>
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script setup>
     import { ref, reactive, computed, onMounted, watch } from 'vue';
     import { applicationService } from '../api/services/applicationService';
+    import { userRoleService } from '../api/services/userRoleService';
     import debounce from 'lodash/debounce';
     import Swal from 'sweetalert2';
     import { successToast, errorToast } from '@/utils/toast'
 
-    let applications = reactive([]);
+    const applications = ref([]);
     const totalApplications = ref(0);
+    const usersApp = ref([]);
+    const appOpen = ref('');
 
     const search = ref('');
     const statusFilter = ref('');
@@ -222,7 +329,47 @@
     const loading = ref(true);
     const showModal = ref(false);
     const showCreateModal = ref(false);
+    const showUserAppModal = ref(false);
     const isEditing = ref(false);
+
+    const searchUserApp = ref('');
+    const currentPageUserApp = ref(1);
+    const lastPageUserApp = ref(1);
+    const perPageUserApp = ref(15);
+
+    const groupAllUsers = computed(() => {
+      if (!usersApp.value || usersApp.value.length === 0) return [];
+
+      // Filter berdasarkan pencarian jika ada
+      const filteredUsers = searchUserApp.value 
+        ? usersApp.value.filter(user => 
+            user.code.toLowerCase().includes(searchUserApp.value.toLowerCase()) ||
+            user.username.toLowerCase().includes(searchUserApp.value.toLowerCase()) ||
+            user.full_name.toLowerCase().includes(searchUserApp.value.toLowerCase()) ||
+            user.role.toLowerCase().includes(searchUserApp.value.toLowerCase())
+          )
+        : usersApp.value;
+      
+      // Mengelompokkan pengguna berdasarkan code, username, dan full_name
+      const groups = {};
+      
+      filteredUsers.forEach(user => {
+        // Membuat kunci unik dari kombinasi ketiga kolom
+        const key = `${user.code}-${user.username}-${user.full_name}`;
+        
+        if (!groups[key]) {
+          groups[key] = {
+            key,
+            items: []
+          };
+        }
+        
+        groups[key].items.push(user);
+      });
+      
+      // Mengubah objek groups menjadi array
+      return Object.values(groups);
+    });
 
     const statusOptions = [
       { label: 'Aktif', value: '1' },
@@ -263,7 +410,7 @@
           }
 
           const response = await applicationService.getApplications(params);
-          applications = response.data.data;
+          applications.value = response.data.data;
 
           totalApplications.value = response.data.pagination.total;
           currentPage.value = response.data.pagination.current_page;
@@ -289,6 +436,14 @@
       showModal.value = true;
     }
 
+    const showUserApplication = async (app) => {
+      const uuid = app.uuid
+      const response = await applicationService.getUserApplication(uuid);
+      usersApp.value = response.data.data;
+      showUserAppModal.value = true;
+      appOpen.value = app.name;
+    }
+
     const loadData = (app) => {
       formData.id = app.id
       formData.uuid = app.uuid
@@ -305,10 +460,14 @@
     }
 
     const toggleStatus = async (app) => {
+      const original = app.is_active
+      app.is_active = !original
+
       try {
         await applicationService.updateStatus(app.uuid);
-        await fetchApplications();
+        successToast(`Status aplikasi diubah menjadi ${app.is_active ? 'Aktif' : 'Tidak Aktif'}`);
       } catch (error) {
+        app.is_active = original
         console.error('Failed to toggle application status:', error);
         errorToast(error);
       }
@@ -361,9 +520,33 @@
       }
     }
 
+    const removeUserApp = async (uuid) => {
+      const result = await Swal.fire({
+        title: 'Konfirmasi',
+        text: `Anda akan menghapus peran pengguna ini?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+      });
+      
+      if (result.isConfirmed) {
+        try {
+          const response = await userRoleService.deleteUserRole(uuid);
+          usersApp.value = response.data.data;
+          successToast(response.data.message)
+        } catch (error) {
+          errorToast(error.response.data.message);
+        }
+      }
+    }
+
     const closeModal = () => {
       showModal.value = false;
       showCreateModal.value = false;
+      showUserAppModal.value = false;
       isEditing.value = false;
       resetFormData();
     }
@@ -422,6 +605,52 @@
       currentPage.value = 1;
       fetchApplications();
     }
+
+    // modal
+    // Total halaman berdasarkan perPage
+    const totalPages = computed(() => {
+      if (perPageUserApp.value === -1) return 1;
+      const totalGroups = groupAllUsers.value.length;
+      return Math.max(1, Math.ceil(totalGroups / perPageUserApp.value));
+    });
+
+    // Update lastPageUserApp setiap kali totalPages berubah
+    watch(totalPages, (newValue) => {
+      lastPageUserApp.value = newValue;
+      // Pastikan currentPage tidak melebihi lastPage
+      if (currentPageUserApp.value > lastPageUserApp.value) {
+        currentPageUserApp.value = lastPageUserApp.value;
+      }
+    });
+
+    // Data yang ditampilkan sesuai pagination
+    const groupedUsers = computed(() => {
+      // Jika menampilkan semua data
+      if (perPageUserApp.value === -1) return groupAllUsers.value;
+      
+      const startIndex = (currentPageUserApp.value - 1) * perPageUserApp.value;
+      const endIndex = startIndex + perPageUserApp.value;
+      
+      return groupAllUsers.value.slice(startIndex, endIndex);
+    });
+
+    // Fungsi untuk navigasi pagination
+    const nextPageUserApp = () => {
+      if (currentPageUserApp.value < lastPageUserApp.value) {
+        currentPageUserApp.value++;
+      }
+    };
+
+    const prevPageUserApp = () => {
+      if (currentPageUserApp.value > 1) {
+        currentPageUserApp.value--;
+      }
+    };
+
+    const handleLimitChangeUserApp = () => {
+      // Reset ke halaman pertama saat mengubah jumlah item per halaman
+      currentPageUserApp.value = 1;
+    };
 
     onMounted(() => {
       fetchApplications();
