@@ -41,8 +41,32 @@ if (typeof window !== 'undefined') {
 // Refresh token handler
 const handleTokenRefresh = async () => {
     const token = localStorage.getItem('access_token');
+    
+    // Cek apakah token sudah expired
+    const isTokenExpired = () => {
+        if (!token) return true;
+        
+        try {
+            // Parse token untuk mendapatkan payload
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            
+            // Cek apakah token memiliki exp claim
+            if (!payload || !payload.exp) return false;
+            
+            // Bandingkan waktu expired dengan waktu sekarang (dalam detik)
+            const currentTime = Math.floor(Date.now() / 1000);
+            
+            // Tambahkan buffer 30 detik untuk antisipasi latency
+            return payload.exp < (currentTime + 30);
+        } catch (error) {
+            // console.error('Error parsing token:', error);
+            console.log(error)
+            return true; // Anggap expired jika format token tidak valid
+        }
+    };
 
-    if (!isRefreshing && token) {
+    // Refresh token hanya jika token expired dan belum dalam proses refresh
+    if (!isRefreshing && token && isTokenExpired()) {
         isRefreshing = true;
         refreshPromise = authService.refreshToken()
             .then(response => {
@@ -62,9 +86,20 @@ const handleTokenRefresh = async () => {
                 refreshPromise = null;
             });
     }
-
-    return refreshPromise;
-};
+    
+    // Jika refresh sedang berjalan, kembalikan promise yang sedang aktif
+    if (refreshPromise) {
+        return refreshPromise;
+    }
+    
+    // Jika token masih valid, kembalikan token saat ini
+    if (token && !isTokenExpired()) {
+        return Promise.resolve(token);
+    }
+    
+    // Jika tidak ada token dan tidak sedang refresh, kembalikan null
+    return Promise.resolve(null);
+}
 
 // Check token expiration
 const shouldRefreshToken = () => {
@@ -85,7 +120,7 @@ const shouldRefreshToken = () => {
     } catch {
         return false;
     }
-};
+}
 
 // Check for inactivity
 setInterval(() => {
@@ -125,7 +160,7 @@ api.interceptors.request.use(async config => {
     }
     
     return config;
-});
+})
 
 // Response interceptor
 api.interceptors.response.use(
@@ -158,6 +193,6 @@ api.interceptors.response.use(
             return Promise.reject(refreshError);
         }
     }
-);
+)
 
 export default api;

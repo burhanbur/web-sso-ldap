@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { ref, computed, onMounted } from 'vue';
 import { authService } from '../api/services/authService';
 
 import MainLayout from '../layouts/MainLayout.vue';
@@ -14,6 +13,7 @@ import UserRolesPage from '../pages/UserRolesPage.vue';
 import ProfilePage from '../pages/ProfilePage.vue';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage.vue';
 import ResetPasswordPage from '../pages/ResetPasswordPage.vue';
+import { errorToast } from '@/utils/toast';
 
 const routes = [
     {
@@ -96,40 +96,54 @@ const router = createRouter({
 // Navigation guard
 router.beforeEach((to, from, next) => {
     const isAuthenticated = !!localStorage.getItem('access_token');
-    const currentUser = ref([]);
-    const isAdmin = computed(() => {
-        if (!currentUser.value || !currentUser.value.app_access) return false;
-        
-        const ssoApp = currentUser.value.app_access.find(app => app.code === 'SSO');
-        if (!ssoApp) return false;
-        
-        return ssoApp.roles.some(role => role.code === 'admin');
-    })
 
-    const setUser = async () => {
-        const response = await authService.me();
-        currentUser.value = response.data.data;
-    }
-
+    // Handle routes that require authentication
     if (to.matched.some(record => record.meta.requiresAuth)) {
         if (!isAuthenticated) {
-            next('/login');
-        } else if (to.matched.some(record => record.meta.requiresAdmin)) {
-            if (!isAdmin) {
-                next('/dashboard');
-            }
-        } else {
-            next();
+            return next('/login');
         }
-    } else if (to.matched.some(record => record.meta.requiresGuest)) {
+        
+        // For protected routes, check admin status
+        authService.me()
+            .then(response => {
+                const currentUser = response.data.data;
+                
+                // Check if user is admin
+                let isAdmin = false;
+                if (currentUser && currentUser.app_access) {
+                    const ssoApp = currentUser.app_access.find(app => app.code === 'SSO');
+                    if (ssoApp) {
+                        isAdmin = ssoApp.roles.some(role => role.code === 'admin');
+                    }
+                }
+                
+                // Check if route requires admin privileges
+                if (to.matched.some(record => record.meta.requiresAdmin) && !isAdmin) {
+                    next('/dashboard');
+                } else {
+                    next();
+                }
+            })
+            .catch(error => {
+                errorToast(error);
+                // If there's an error fetching user data, redirect to login
+                // localStorage.removeItem('access_token');
+                next('/dashboard');
+                // next('/login');
+            });
+    } 
+    // Handle guest-only routes
+    else if (to.matched.some(record => record.meta.requiresGuest)) {
         if (isAuthenticated) {
             next('/dashboard');
         } else {
             next();
         }
     }
-
-    next();
+    // For routes with no restrictions
+    else {
+        next();
+    }
 });
 
 export default router;

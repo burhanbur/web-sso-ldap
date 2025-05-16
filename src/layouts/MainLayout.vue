@@ -13,10 +13,10 @@
                 <nav class="nav-menu" :class="{ 'nav-menu-open': isMenuOpen }">
                     <router-link to="/dashboard" class="nav-item" active-class="active">
                         <font-awesome-icon icon="home" />
-                        <span>Dasbor</span>
+                        <span>Beranda</span>
                     </router-link>
 
-                    <template v-if="isAdmin">
+                    <template v-if="isAdminUser">
                         <router-link to="/users" class="nav-item" active-class="active">
                             <font-awesome-icon icon="users" />
                             <span>Pengguna</span>
@@ -35,12 +35,13 @@
                         </router-link> -->
                     </template>
                 </nav>
+
                 <div class="user-menu" @click="toggleUserMenu">
                     <button class="user-menu-btn">
-                        <font-awesome-icon icon="user-circle" /> &nbsp; {{ user.full_name }}
+                        <font-awesome-icon icon="user-circle" /> &nbsp; {{ userData ? userData.full_name : 'Pengguna' }}
                     </button>
                     <div v-if="showUserMenu" class="user-dropdown">
-                        <button v-if="isImpersonating.value" class="dropdown-item" @click="leaveImpersonation">
+                        <button v-if="isImpersonating" class="dropdown-item" @click="leaveImpersonation">
                             <font-awesome-icon icon="user-secret" /> &nbsp; Keluar Impersonasi
                         </button>
                         <router-link to="/profile" class="dropdown-item" active-class="active"><font-awesome-icon icon="user" /> &nbsp; Profil</router-link>
@@ -74,20 +75,38 @@
     import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
     import { authService } from '../api/services/authService';
     import { successToast, errorToast, warningToast } from '@/utils/toast'
-    import { useAuth } from '../utils/auth';
 
-    const { isAdmin } = useAuth();
+    // Data user
+    const userData = ref(null);
+    const isLoading = ref(true);
 
-    const user = ref([]);
+    // Cek apakah user adalah admin
+    const isAdminUser = computed(() => {
+        if (!userData.value || !userData.value.app_access) return false;
+        
+        const ssoApp = userData.value.app_access.find(app => app.code === 'SSO');
+        if (!ssoApp) return false;
+        
+        return ssoApp.roles.some(role => role.code === 'admin');
+    });
+
+    // Fetch data user
+    const fetchUserData = async () => {
+        isLoading.value = true;
+        try {
+            const response = await authService.me();
+            userData.value = response.data.data;
+        } catch (error) {
+            errorToast(error);
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
     const router = useRouter();
     const isMenuOpen = ref(false);
     const showUserMenu = ref(false);
-    const isImpersonating = ref(localStorage.getItem('impersonated_by') ? true : false);
-
-    const me = async () => {
-        const response = await authService.me();
-        user.value = response.data.data;
-    }
+    let isImpersonating = ref(localStorage.getItem('impersonated_by') ? true : false);
 
     const logout = async () => {
         const logout = await authService.logout();
@@ -103,9 +122,15 @@
     const leaveImpersonation = async () => {
         try {
             const response = await authService.leaveImpersonateUser();
-            localStorage.removeItem('impersonated_by');
-            localStorage.setItem('access_token', response.data.access_token);
-            router.push('/dashboard');
+
+            if (response && response.data && response.data.data) {
+                localStorage.removeItem('impersonated_by');
+                localStorage.setItem('access_token', response.data.data.access_token);
+                window.location.reload();
+                successToast('Berhasil keluar impersonasi pengguna!');
+            } else {
+                errorToast('Gagal keluar impersonasi pengguna!');
+            }
         } catch (error) {
             console.error('Failed to leave impersonation:', error);
             errorToast(error);
@@ -127,7 +152,7 @@
 
     onMounted(() => {
         document.addEventListener('click', closeUserMenu)
-        me();
+        fetchUserData();
     })
 
     onBeforeUnmount(() => {

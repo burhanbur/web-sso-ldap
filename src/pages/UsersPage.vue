@@ -603,8 +603,11 @@
         currentPage.value = response.data.pagination.current_page;
         lastPage.value = response.data.pagination.last_page;
       } catch (error) {
-        console.error('Failed to fetch users:', error);
-        errorToast(error);
+        const message =
+          error.response?.data?.message ||
+          error.message
+          
+        errorToast(message);
       } finally {
         loading.value = false;
       }
@@ -625,11 +628,22 @@
       if (result.isConfirmed) {
         try {
           const response = await authService.startImpersonateUser(user.uuid);
-          console.log(response);
-          successToast('Berhasil masuk sebagai pengguna!');
-          router.push('dashboard');
+
+          if (response && response.data && response.data.data) {
+            localStorage.setItem('impersonated_by', user.uuid);
+            localStorage.setItem('access_token', response.data.data.access_token);
+            window.location.reload();
+            successToast('Berhasil masuk sebagai impersonasi pengguna!');
+          } else {
+            errorToast('Gagal masuk sebagai impersonasi pengguna!');
+          }
         } catch (error) {
-          errorToast(error);
+          const message =
+            error.response?.data?.message ||
+            error.message ||
+            'Gagal melakukan impersonasi.'
+
+          errorToast(message)
         }
       }
     }

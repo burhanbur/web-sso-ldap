@@ -5,7 +5,7 @@
       </header>
   
       <section class="dashboard-section">
-        <h2>✨&nbsp; Aplikasi yang Anda Gunakan</h2>
+        <h2>🌎&nbsp; Aplikasi yang Anda Gunakan</h2>
         <div v-if="loadingApps" class="loading spinner-container"><div class="spinner"></div></div>
         <div v-if="applications.length === 0 && !loadingApps" class="text-center"><h3>Tidak ada data yang ditemukan.</h3></div>
         <div v-else class="layout-grid">
@@ -53,6 +53,7 @@
 import { ref, onMounted } from 'vue';
 import { applicationService } from '../api/services/applicationService';
 import { userService } from '../api/services/userService';
+import { errorToast } from '@/utils/toast';
 
 const applications = ref([]);
 const latestUsers = ref([]);
@@ -60,15 +61,16 @@ const loadingApps = ref(true);
 const loadingUsers = ref(true);
 
 const fetchApplications = async () => {
-    try {
-        const response = await applicationService.getMyApplications();
-        applications.value = response.data.data;
-    } catch (error) {
-        console.error('Failed to fetch applications:', error);
-    } finally {
-        loadingApps.value = false;
-    }
-};
+  try {
+    const response = await applicationService.getMyApplications();
+    applications.value = response.data.data;
+  } catch (error) {
+    errorToast(error)
+    console.error('Failed to fetch applications:', error);
+  } finally {
+    loadingApps.value = false;
+  }
+}
 
 const fetchLatestUsers = async () => {
     try {
@@ -79,11 +81,11 @@ const fetchLatestUsers = async () => {
     } finally {
         loadingUsers.value = false;
     }
-};
+}
 
 onMounted(() => {
     fetchApplications();
-    fetchLatestUsers();
+    // fetchLatestUsers();
 });
 </script>
 
