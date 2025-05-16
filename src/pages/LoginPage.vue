@@ -84,7 +84,6 @@
         try {
             loading.value = true;
             const response = await authService.login(username.value, password.value);
-            console.log(response);
 
             if (!response) {
                 throw new Error('Login failed');

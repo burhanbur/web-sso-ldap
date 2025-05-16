@@ -9,27 +9,31 @@
                 <button class="hamburger-btn" @click="toggleMenu" aria-label="Toggle menu">
                     <font-awesome-icon :icon="isMenuOpen ? 'times' : 'bars'" />
                 </button>
+
                 <nav class="nav-menu" :class="{ 'nav-menu-open': isMenuOpen }">
                     <router-link to="/dashboard" class="nav-item" active-class="active">
                         <font-awesome-icon icon="home" />
                         <span>Dasbor</span>
                     </router-link>
-                    <router-link to="/users" class="nav-item" active-class="active">
-                        <font-awesome-icon icon="users" />
-                        <span>Pengguna</span>
-                    </router-link>
-                    <router-link to="/applications" class="nav-item" active-class="active">
-                        <font-awesome-icon icon="window-restore" />
-                        <span>Aplikasi Klien</span>
-                    </router-link>
-                    <router-link to="/roles" class="nav-item" active-class="active">
-                        <font-awesome-icon icon="user-shield" />
-                        <span>Peran</span>
-                    </router-link>
-                    <!-- <router-link to="/user-roles" class="nav-item" active-class="active">
-                        <font-awesome-icon icon="user-tag" />
-                        <span>Peran Pengguna</span>
-                    </router-link> -->
+
+                    <template v-if="isAdmin">
+                        <router-link to="/users" class="nav-item" active-class="active">
+                            <font-awesome-icon icon="users" />
+                            <span>Pengguna</span>
+                        </router-link>
+                        <router-link to="/applications" class="nav-item" active-class="active">
+                            <font-awesome-icon icon="window-restore" />
+                            <span>Aplikasi Klien</span>
+                        </router-link>
+                        <router-link to="/roles" class="nav-item" active-class="active">
+                            <font-awesome-icon icon="user-shield" />
+                            <span>Peran</span>
+                        </router-link>
+                        <!-- <router-link to="/user-roles" class="nav-item" active-class="active">
+                            <font-awesome-icon icon="user-tag" />
+                            <span>Peran Pengguna</span>
+                        </router-link> -->
+                    </template>
                 </nav>
                 <div class="user-menu" @click="toggleUserMenu">
                     <button class="user-menu-btn">
@@ -67,9 +71,12 @@
 <script setup>
     import { useRouter } from 'vue-router';
     import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-    import { ref, onMounted, onBeforeUnmount } from 'vue';
+    import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
     import { authService } from '../api/services/authService';
     import { successToast, errorToast, warningToast } from '@/utils/toast'
+    import { useAuth } from '../utils/auth';
+
+    const { isAdmin } = useAuth();
 
     const user = ref([]);
     const router = useRouter();
@@ -350,31 +357,30 @@
     .dropdown-item.logout {
       color: var(--error);
     }
-</style>
-<style scoped>
-.footer {
-  background-color: var(--surface);
-  border-top: 1px solid var(--border);
-  padding: 1rem 2rem;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  text-align: center;
-}
 
-.footer a {
-  color: var(--primary);
-  text-decoration: none;
-}
+    .footer {
+    background-color: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 1rem 2rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    text-align: center;
+    }
 
-.footer a:hover {
-  text-decoration: underline;
-}
+    .footer a {
+    color: var(--primary);
+    text-decoration: none;
+    }
 
-.footer-content {
-  max-width: 1400px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
+    .footer a:hover {
+    text-decoration: underline;
+    }
+
+    .footer-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    }
 </style>

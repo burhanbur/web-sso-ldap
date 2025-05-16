@@ -83,6 +83,7 @@
     import { ref, computed, onMounted } from 'vue';
     import { useRouter, useRoute } from 'vue-router';
     import { authService } from '../api/services/authService';
+    import { successToast, errorToast, warningToast } from '@/utils/toast'
 
     const router = useRouter();
     const route = useRoute();
@@ -136,6 +137,7 @@
             
             if (isSuccess.value) {
                 sessionStorage.setItem('successMsg', message.value);
+                successToast(message.value);
                 router.push('/login');
             }
         } catch (error) {
