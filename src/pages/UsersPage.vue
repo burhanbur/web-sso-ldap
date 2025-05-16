@@ -47,7 +47,7 @@
     </div>
 
     <div v-if="loading" class="loading spinner-container"><div class="spinner"></div></div>
-    <div v-if="users.length === 0 && !loading" class="text-center">Tidak ada data yang ditemukan.</div>
+    <div v-if="users.length === 0 && !loading" class="text-center"><h3>Tidak ada data yang ditemukan.</h3></div>
     <div v-else class="layout-grid">
       <div v-for="user in users" :key="user.id" class="card">
         <div class="user-top">
@@ -471,7 +471,6 @@
       editData: Object,
     });
 
-    const route = useRoute();
     const router = useRouter();
 
     let availableApps = reactive([]);
@@ -538,12 +537,14 @@
       try {
         const response = await userService.importUser(formData);
 
-        successToast(response.data.message || 'Import berhasil!');
-
         // Optionally reset
         file.value = null
         fileName.value = 'Pilih file Excel...'
         previewData.value = []
+    
+        await fetchUsers();
+
+        successToast(response.data.message || 'Import berhasil!');
       } catch (error) {
         console.log('Error:', error);
         errorToast(error);

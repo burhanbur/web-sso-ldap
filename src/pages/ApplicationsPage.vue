@@ -42,7 +42,7 @@
     </div>
 
     <div v-if="loading" class="loading spinner-container"><div class="spinner"></div></div>
-    <div v-if="applications.length === 0 && !loading" class="text-center">Tidak ada data yang ditemukan.</div>
+    <div v-if="applications.length === 0 && !loading" class="text-center"><h3>Tidak ada data yang ditemukan.</h3></div>
     <div v-else class="layout-grid">
       <div v-for="app in applications" :key="app.id" class="card">
         <div class="app-content">
@@ -677,7 +677,7 @@
 
 .app-logo {
   width: 60px;
-  height: 60px;
+  height: 90px;
   border-radius: 8px;
   object-fit: contain;
   background: #f0f0f0;

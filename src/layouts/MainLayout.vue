@@ -36,7 +36,7 @@
                         <font-awesome-icon icon="user-circle" /> &nbsp; {{ user.full_name }}
                     </button>
                     <div v-if="showUserMenu" class="user-dropdown">
-                        <button v-if="!isImpersonating" class="dropdown-item" @click="leaveImpersonation">
+                        <button v-if="isImpersonating.value" class="dropdown-item" @click="leaveImpersonation">
                             <font-awesome-icon icon="user-secret" /> &nbsp; Keluar Impersonasi
                         </button>
                         <router-link to="/profile" class="dropdown-item" active-class="active"><font-awesome-icon icon="user" /> &nbsp; Profil</router-link>
@@ -75,7 +75,7 @@
     const router = useRouter();
     const isMenuOpen = ref(false);
     const showUserMenu = ref(false);
-    const isImpersonating = ref(localStorage.getItem('impersonated_by'));
+    const isImpersonating = ref(localStorage.getItem('impersonated_by') ? true : false);
 
     const me = async () => {
         const response = await authService.me();

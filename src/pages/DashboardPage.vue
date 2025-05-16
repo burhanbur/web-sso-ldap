@@ -5,12 +5,12 @@
       </header>
   
       <section class="dashboard-section">
-        <h2>🚀 Aplikasi Klien</h2>
+        <h2>✨&nbsp; Aplikasi yang Anda Gunakan</h2>
         <div v-if="loadingApps" class="loading spinner-container"><div class="spinner"></div></div>
-        <div v-if="applications.length === 0 && !loading" class="text-center">Tidak ada data yang ditemukan.</div>
+        <div v-if="applications.length === 0 && !loadingApps" class="text-center"><h3>Tidak ada data yang ditemukan.</h3></div>
         <div v-else class="layout-grid">
           <div v-for="app in applications" :key="app.id" class="card">
-            <router-link style="color: inherit;" :to="`/applications/${app.uuid}?url=${app.login_url}`">
+            <a style="color: inherit;" :href="app.login_url" target="_blank">
               <div class="app-content">
                 <img :src="/*app.image ||*/ '/favicon.png'" :alt="app.name" class="app-logo" />
                   <div class="app-info">
@@ -29,7 +29,7 @@
               <div class="app-description">
                 <p class="description">{{ app.description || 'Tidak ada deskripsi' }}</p>
               </div>
-            </router-link>
+            </a>
           </div>
         </div>
       </section>
