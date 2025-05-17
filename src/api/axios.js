@@ -16,7 +16,7 @@ const api = axios.create({
 const router = useRouter();
 let lastActivity = Date.now();
 const INACTIVITY_TIMEOUT = 60 * 60 * 1000; // 60 minutes in milliseconds
-const TOKEN_REFRESH_THRESHOLD = 1 * 60 * 1000; // Refresh token 1 minutes before expiry
+const TOKEN_REFRESH_THRESHOLD = 5 * 60 * 1000; // Refresh token 5 minutes before expiry
 
 // Token refresh state
 let isRefreshing = false;
@@ -29,11 +29,11 @@ const updateActivity = () => {
     lastActivity = Date.now();
     // const formattedTime = new Date(lastActivity).toLocaleTimeString();
     // console.log('User activity updated:', formattedTime);
-};
+}
 
 // Setup activity listeners
 if (typeof window !== 'undefined') {
-    ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(event => {
+    ['mousedown', 'keydown', 'scroll', 'touchstart', 'wheel', 'mousemove'].forEach(event => {
         window.addEventListener(event, updateActivity);
     });
 }
@@ -104,6 +104,7 @@ const handleTokenRefresh = async () => {
 // Check token expiration
 const shouldRefreshToken = () => {
     const now = Date.now();
+
     // Only check token expiration if enough time has passed since last check
     if (now - lastTokenCheck < TOKEN_CHECK_INTERVAL) {
         return false;
@@ -115,8 +116,8 @@ const shouldRefreshToken = () => {
 
     try {
         const decoded = jwtDecode(token);
-        const expiresIn = decoded.exp - now / 1000;
-        return expiresIn < TOKEN_REFRESH_THRESHOLD;
+        const expiresIn = decoded.exp - Math.floor(now / 1000);
+        return expiresIn < TOKEN_REFRESH_THRESHOLD / 1000;
     } catch {
         return false;
     }
@@ -156,6 +157,7 @@ api.interceptors.request.use(async config => {
             config.headers.Authorization = `Bearer ${newToken}`;
         } catch (error) {
             console.error('Token refresh failed:', error);
+            errorToast(error);
         }
     }
     
