@@ -111,7 +111,7 @@ router.beforeEach((to, from, next) => {
                 // Check if user is admin
                 let isAdmin = false;
                 if (currentUser && currentUser.app_access) {
-                    const ssoApp = currentUser.app_access.find(app => app.code === 'SSO');
+                    const ssoApp = currentUser.app_access.find(app => (app.code === 'SSO' || app.code === 'sso'));
                     if (ssoApp) {
                         isAdmin = ssoApp.roles.some(role => role.code === 'admin');
                     }

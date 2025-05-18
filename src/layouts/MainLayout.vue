@@ -84,7 +84,7 @@
     const isAdminUser = computed(() => {
         if (!userData.value || !userData.value.app_access) return false;
         
-        const ssoApp = userData.value.app_access.find(app => app.code === 'SSO');
+        const ssoApp = userData.value.app_access.find(app => (app.code === 'SSO' || app.code === 'sso'));
         if (!ssoApp) return false;
         
         return ssoApp.roles.some(role => role.code === 'admin');
