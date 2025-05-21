@@ -209,6 +209,17 @@
               />
             </div>
 
+            <div v-if="!isEditing">
+              <div class="form-group">
+                <label for="type">Tipe Pengguna</label>
+                <select id="type" v-model="formData.type" required @input="onFullNameInput">
+                  <option value="">Pilih Tipe Pengguna</option>
+                  <option value="staff">Staf</option>
+                  <option value="student">Mahasiswa</option>
+                </select>
+              </div>
+            </div>
+
             <div class="form-group">
               <label for="username">Username</label>
               <div class="username-input-group">
@@ -557,6 +568,7 @@
     ];
 
     let formData = reactive({
+      type: '',
       username: '',
       code: '',
       full_name: '',
@@ -708,7 +720,7 @@
       }
       
       try {
-        const response = await userService.generateUsername(formData.full_name);
+        const response = await userService.generateUsername(formData.full_name, formData.type);
         formData.username = response.data.data;
       } catch (error) {
         console.error('Failed to generate username:', error);

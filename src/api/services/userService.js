@@ -7,8 +7,8 @@ export const userService = {
     getLatestUsers: () => {
         return api.get('/users?limit=5&sort=created_at,desc');
     },
-    generateUsername: (name) => {
-        return api.post('/users/generate-username', { 'name': name });
+    generateUsername: (name, type) => {
+        return api.post('/users/generate-username', { 'name': name, 'type': type });
     },
     createUser: (user) => {
         return api.post('/users', user);
