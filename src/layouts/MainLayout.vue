@@ -116,6 +116,13 @@
             localStorage.removeItem('impersonated_by');
             successToast(logout.data.message);
             router.push('/login');
+        } else {
+            const message =
+                error.response?.data?.message ||
+                error.message ||
+                'Failed to logout.'
+
+            errorToast(message)
         }
     }
 
@@ -132,8 +139,12 @@
                 errorToast('Gagal keluar impersonasi pengguna!');
             }
         } catch (error) {
-            console.error('Failed to leave impersonation:', error);
-            errorToast(error);
+            const message =
+                error.response?.data?.message ||
+                error.message ||
+                'Failed to leave impersonation.'
+
+            errorToast(message)
         }
     }
 
