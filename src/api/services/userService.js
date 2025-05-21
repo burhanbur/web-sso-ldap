@@ -32,7 +32,4 @@ export const userService = {
             }
         });
     },
-    updateMyProfile: (user) => {
-        return api.post('/users/profile', user);
-    },
 };

@@ -32,6 +32,9 @@ export const authService = {
             password_confirmation
         });
     },
+    updateMyProfile: (user) => {
+        return api.post('/auth/me/profiles', user);
+    },
     refreshToken: () => {
         return api.post('/auth/refresh');
     },

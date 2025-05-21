@@ -335,7 +335,7 @@
   const handleSubmit = async () => {
     try {
       let response;
-      response = await userService.updateMyProfile(formData);
+      response = await authService.updateMyProfile(formData);
 
       await fetchUser();
       closeModal();
