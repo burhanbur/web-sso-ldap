@@ -94,11 +94,13 @@
             }
 
             localStorage.setItem('access_token', response.data.access_token);
+            successToast('Login berhasil');
             router.push('/dashboard');
         } catch (error) {
-            // errorToast(error)
-            // console.error('Login error stack:', error.stack)
-            errorMsg.value = error || 'Invalid username or password';
+            const message = 'Terjadi kesalahan, silakan coba lagi nanti';
+            
+            errorToast(message);
+            // errorMsg.value = error || 'Invalid username or password';
         } finally {
             loading.value = false;
         }
