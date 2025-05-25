@@ -48,7 +48,7 @@
                     </div>
 
                     <button type="submit" :disabled="loading" class="sign-in-btn">
-                        {{ loading ? 'Logging in...' : 'Login' }}
+                        <font-awesome-icon icon="sign-in-alt" /> &nbsp; {{ loading ? 'Logging in...' : 'Login' }}
                     </button>
                 </form>
 

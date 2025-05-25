@@ -715,7 +715,7 @@
 
     const autoGenerateUsername = async () => {
       if (!formData.full_name) {
-        errorToast('Silakan isi nama lengkap da tipe pengguna terlebih dahulu.');
+        errorToast('Silakan isi nama lengkap dan tipe pengguna terlebih dahulu.');
         return;
       }
       
