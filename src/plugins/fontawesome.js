@@ -28,6 +28,10 @@ import {
   faSync,
   faFileUpload,
   faUserCircle,
+  faBell,
+  faCheckDouble,
+  faKey,
+  faCopy,
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -61,5 +65,9 @@ library.add(
   faSync,
   faFileUpload,
   faUserCircle,
+  faBell,
+  faCheckDouble,
+  faKey,
+  faCopy,
   faTimes,
 );

@@ -77,6 +77,9 @@
           </div>
 
           <div class="data-actions">
+            <button @click="showClientIdAndSecret(app)" class="action-btn dark">
+              <font-awesome-icon icon="key" />
+            </button>
             <button @click="showUserApplication(app)" class="action-btn warning">
               <font-awesome-icon icon="users" />
             </button>
@@ -311,6 +314,14 @@
         </div>
       </div>
     </div>
+
+    <!-- Client Credentials Modal -->
+    <ClientCredentialsModal
+      v-if="showCredentialsModal"
+      :client-id="selectedApp?.client_id"
+      :client-secret="selectedApp?.client_secret"
+      @close="showCredentialsModal = false"
+    />
   </div>
 </template>
 
@@ -321,11 +332,15 @@
     import debounce from 'lodash/debounce';
     import Swal from 'sweetalert2';
     import { successToast, errorToast } from '@/utils/toast'
+    import ClientCredentialsModal from '../components/modals/ClientCredentialsModal.vue';
 
     const applications = ref([]);
     const totalApplications = ref(0);
     const usersApp = ref([]);
     const appOpen = ref('');
+    
+    const showCredentialsModal = ref(false);
+    const selectedApp = ref(null);
 
     const search = ref('');
     const statusFilter = ref('');
@@ -553,10 +568,17 @@
       }
     }
 
+    const showClientIdAndSecret = (app) => {
+      selectedApp.value = app;
+      showCredentialsModal.value = true;
+    }
+
     const closeModal = () => {
       showModal.value = false;
       showCreateModal.value = false;
       showUserAppModal.value = false;
+      showCredentialsModal.value = false;
+      selectedApp.value = null;
       isEditing.value = false;
       fileName.value = 'Pilih logo...';
       resetFormData();
