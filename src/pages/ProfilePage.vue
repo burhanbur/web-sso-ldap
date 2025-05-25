@@ -285,7 +285,7 @@
       user.value.status = response.data.data.status;
       user.value.app_access = response.data.data.app_access;
     } catch (error) {
-      errorToast('Gagal memuat profil');
+      errorToast('Gagal memuat profil. Silakan coba lagi.');
     }
   }
   

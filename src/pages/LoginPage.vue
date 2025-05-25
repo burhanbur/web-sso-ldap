@@ -85,16 +85,17 @@
             loading.value = true;
             const response = await authService.login(username.value, password.value);
 
+            const errMessage = 'Login gagal. Periksa kembali email atau kata sandi Anda.';
             if (!response) {
-                throw new Error('Login failed');
+                throw new Error(errMessage);
             }
 
             if (!response.data.access_token) {
-                throw new Error('Login failed');
+                throw new Error(errMessage);
             }
 
             localStorage.setItem('access_token', response.data.access_token);
-            successToast('Login berhasil');
+            successToast('Verifikasi identitas berhasil. Mengarahkan ke dashboard.');
             router.push('/dashboard');
         } catch (error) {
             const message = 'Terjadi kesalahan, silakan coba lagi nanti';

@@ -555,7 +555,7 @@
     
         await fetchUsers();
 
-        successToast(response.data.message || 'Import berhasil!');
+        successToast(response.data.message || 'Impor data pengguna berhasil.');
       } catch (error) {
         console.log('Error:', error);
         errorToast(error);
@@ -645,15 +645,15 @@
             localStorage.setItem('impersonated_by', user.uuid);
             localStorage.setItem('access_token', response.data.data.access_token);
             window.location.reload();
-            successToast('Berhasil masuk sebagai impersonasi pengguna!');
+            successToast('Berhasil masuk sebagai impersonasi pengguna.');
           } else {
-            errorToast('Gagal masuk sebagai impersonasi pengguna!');
+            errorToast('Gagal masuk sebagai impersonasi pengguna.');
           }
         } catch (error) {
           const message =
             error.response?.data?.message ||
             error.message ||
-            'Gagal melakukan impersonasi.'
+            'Gagal melakukan impersonasi pengguna.'
 
           errorToast(message)
         }
@@ -715,7 +715,7 @@
 
     const autoGenerateUsername = async () => {
       if (!formData.full_name) {
-        errorToast('Silakan isi nama lengkap terlebih dahulu');
+        errorToast('Silakan isi nama lengkap da tipe pengguna terlebih dahulu.');
         return;
       }
       
@@ -827,7 +827,7 @@
         await userService.updateUserStatus(user.uuid, { status: newStatus });
         user.status = newStatus
 
-        successToast(`Status pengguna ${user.full_name} diubah menjadi ${newStatus}`);
+        successToast(`Status pengguna ${user.full_name} diubah menjadi ${newStatus}.`);
       } catch (error) {
         console.error('Failed to update user status:', error);
         errorToast(error);

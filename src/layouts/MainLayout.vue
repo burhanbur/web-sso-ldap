@@ -120,7 +120,7 @@
             const message =
                 error.response?.data?.message ||
                 error.message ||
-                'Failed to logout.'
+                'Logout gagal. Silakan coba lagi nanti.'
 
             errorToast(message)
         }
@@ -134,15 +134,15 @@
                 localStorage.removeItem('impersonated_by');
                 localStorage.setItem('access_token', response.data.data.access_token);
                 window.location.reload();
-                successToast('Berhasil keluar impersonasi pengguna!');
+                successToast('Berhasil keluar impersonasi pengguna.');
             } else {
-                errorToast('Gagal keluar impersonasi pengguna!');
+                errorToast('Gagal keluar impersonasi pengguna. Silakan coba lagi nanti.');
             }
         } catch (error) {
             const message =
                 error.response?.data?.message ||
                 error.message ||
-                'Failed to leave impersonation.'
+                'Gagal keluar impersonasi pengguna. Silakan coba lagi nanti.'
 
             errorToast(message)
         }

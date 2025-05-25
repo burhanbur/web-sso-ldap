@@ -74,7 +74,7 @@ const showClientSecret = ref(false);
 const copyToClipboard = async (text) => {
   try {
     await navigator.clipboard.writeText(text);
-    successToast('Berhasil disalin ke clipboard');
+    successToast('Berhasil disalin ke clipboard.');
   } catch (err) {
     console.error('Failed to copy:', err);
   }

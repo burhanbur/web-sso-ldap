@@ -33,7 +33,7 @@
                   </div>
                 </div>
                 <div v-else class="empty-notifications">
-                  <i class="fas fa-inbox"></i>
+                  <font-awesome-icon icon="inbox" />
                   <div class="empty-text">
                     <p>Belum ada notifikasi</p>
                     <span>Notifikasi baru akan muncul di sini</span>
