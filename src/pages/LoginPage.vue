@@ -95,10 +95,10 @@
             }
 
             localStorage.setItem('access_token', response.data.access_token);
-            successToast('Verifikasi identitas berhasil. Mengarahkan ke dashboard.');
+            successToast('Verifikasi identitas berhasil.');
             router.push('/dashboard');
         } catch (error) {
-            const message = 'Terjadi kesalahan, silakan coba lagi nanti';
+            const message = 'Login gagal. Periksa kembali data Anda.';
             
             errorToast(message);
             // errorMsg.value = error || 'Invalid username or password';

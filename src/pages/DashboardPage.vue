@@ -50,25 +50,27 @@
         <div v-if="loadingApps" class="loading spinner-container"><div class="spinner"></div></div>
         <div v-if="applications.length === 0 && !loadingApps" class="text-center"><h3>Tidak ada data yang ditemukan.</h3></div>
         <div v-else class="layout-grid">
-          <div v-for="app in applications" :key="app.id" class="card">
+          <div v-for="app in applications" :key="app.id">
             <a style="color: inherit;" :href="app.login_url" target="_blank">
-              <div class="app-content">
-                <img :src="/*app.image ||*/ '/favicon.png'" :alt="app.name" class="app-logo" />
-                  <div class="app-info">
-                    <h3>{{ app.name }}</h3>
-                    <p class="code">{{ app.code }}</p>
-                    <div class="badges">
-                      <span class="badge platform">{{ app.platform_type }}</span>
-                      <span class="badge visibility">{{ app.visibility }}</span>
-                      <span :class="['badge', 'status', app.is_active ? 'active' : 'inactive']">
-                        {{ app.is_active ? 'Aktif' : 'Tidak Aktif' }}
-                      </span>
+              <div class="card">
+                <div class="app-content">
+                  <img :src="/*app.image ||*/ '/favicon.png'" :alt="app.name" class="app-logo" />
+                    <div class="app-info">
+                      <h3>{{ app.name }}</h3>
+                      <p class="code">{{ app.code }}</p>
+                      <div class="badges">
+                        <span class="badge platform">{{ app.platform_type }}</span>
+                        <span class="badge visibility">{{ app.visibility }}</span>
+                        <span :class="['badge', 'status', app.is_active ? 'active' : 'inactive']">
+                          {{ app.is_active ? 'Aktif' : 'Tidak Aktif' }}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-              </div>
+                </div>
 
-              <div class="app-description">
-                <p class="description">{{ app.description || 'Tidak ada deskripsi' }}</p>
+                <div class="app-description">
+                  <p class="description">{{ app.description || 'Tidak ada deskripsi' }}</p>
+                </div>
               </div>
             </a>
           </div>
