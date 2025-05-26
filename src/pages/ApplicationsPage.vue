@@ -77,9 +77,9 @@
           </div>
 
           <div class="data-actions">
-            <button @click="showClientIdAndSecret(app)" class="action-btn dark">
+            <!-- <button @click="showClientIdAndSecret(app)" class="action-btn dark">
               <font-awesome-icon icon="key" />
-            </button>
+            </button> -->
             <button @click="showUserApplication(app)" class="action-btn warning">
               <font-awesome-icon icon="users" />
             </button>
@@ -316,12 +316,12 @@
     </div>
 
     <!-- Client Credentials Modal -->
-    <ClientCredentialsModal
+    <!-- <ClientCredentialsModal
       v-if="showCredentialsModal"
       :client-id="selectedApp?.client_id"
       :client-secret="selectedApp?.client_secret"
       @close="showCredentialsModal = false"
-    />
+    /> -->
   </div>
 </template>
 
