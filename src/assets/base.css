@@ -1,5 +1,19 @@
 /* color palette from <https://github.com/vuejs/theme> */
 :root {
+  /* Theme Colors */
+  --text-color: #333;
+  --text-secondary: #64748b;
+  --bg-color: #fff;
+  --card-bg: #fff;
+  --border-color: #e5e7eb;
+  --header-bg: #fff;
+  --surface: #fff;
+  --hover: #f5f7fa;
+  --hover-dark: #e2e8f0;
+  --primary: #2196f3;
+  --error: #ef4444;
+
+  /* Original Variables */
   --vt-c-white: #ffffff;
   --vt-c-white-soft: #f8f8f8;
   --vt-c-white-mute: #f2f2f2;
@@ -82,6 +96,19 @@
   }
 }
 
+/* Dark theme */
+:root.dark {
+  --text-color: #e5e7eb;
+  --text-secondary: #94a3b8;
+  --bg-color: #1a1a1a;
+  --card-bg: #262626;
+  --border-color: #404040;
+  --header-bg: #262626;
+  --surface: #262626;
+  --hover: #374151;
+  --hover-dark: #4b5563;
+}
+
 /* Reset */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -104,6 +131,49 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base styles */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark mode adjustments for common elements */
+.dark a {
+  color: var(--primary);
+}
+
+.dark .card,
+.dark .dropdown-menu,
+.dark .modal-content {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: var(--bg-color);
+  border-color: var(--border-color);
+  color: var(--text-color);
+}
+
+.dark table {
+  color: var(--text-color);
+}
+
+.dark th {
+  background-color: var(--card-bg);
+}
+
+.dark tr:nth-child(even) {
+  background-color: var(--card-bg);
+}
+
+.dark tr:hover {
+  background-color: var(--hover);
 }
 
 /* Base elements */

@@ -3,8 +3,7 @@
         <div class="header-content">
           <div class="header-title">
             <h2>📊 Selamat datang di Central Authentication Universitas Pertamina</h2>
-          </div>
-          <div class="header-actions">
+          </div>          <div class="header-actions">
             <div class="notification-wrapper">
               <button @click="toggleNotifications" class="notification-button" :class="{ 'has-unread': hasUnreadNotifications }">
                 <font-awesome-icon icon="bell" size="lg" />
@@ -97,7 +96,10 @@ import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { applicationService } from '../api/services/applicationService';
 import { userService } from '../api/services/userService';
 import { notificationService } from '../api/services/notificationService';
+import { useThemeStore } from '../stores/theme';
 import { errorToast } from '@/utils/toast';
+
+const themeStore = useThemeStore();
 
 const applications = ref([]);
 const latestUsers = ref([]);
@@ -228,8 +230,10 @@ onUnmounted(() => {
   margin: 0 auto;
   padding: 0.25rem 1rem 2rem 1rem;
   font-family: 'Inter', sans-serif;
-  color: #333;
+  color: var(--text-color);
 }
+
+
 
 .dashboard-header {
   margin-bottom: 2rem;
@@ -240,7 +244,7 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  background: white;
+  background: var(--header-bg);
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
@@ -677,5 +681,92 @@ onUnmounted(() => {
 
 .url:hover {
   text-decoration: underline;
+}
+
+.theme-switch {
+  margin-right: 1rem;
+}
+
+.theme-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f7fa;
+  border: none;
+  padding: 10px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.theme-button:hover {
+  background: #e2e8f0;
+  color: #334155;
+  transform: translateY(-1px);
+}
+
+.dark .theme-button {
+  background: #374151;
+  color: #94a3b8;
+}
+
+.dark .theme-button:hover {
+  background: #4b5563;
+  color: #e2e8f0;
+}
+
+.dark .card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+}
+
+.dark .notification-dropdown {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+.dark .notification-header {
+  background: var(--notification-bg);
+  border-color: var(--border-color);
+}
+
+.dark .notification-item {
+  border-color: var(--border-color);
+}
+
+.dark .notification-item:hover {
+  background: var(--hover-bg);
+}
+
+.dark .notification-item.unread {
+  background: #1e293b;
+}
+
+.dark .notification-item.unread:hover {
+  background: #2d3748;
+}
+
+.dark .notification-text {
+  color: #e2e8f0;
+}
+
+.dark .notification-time {
+  color: #94a3b8;
+}
+
+.dark .empty-notifications {
+  color: #94a3b8;
+}
+
+.dark .empty-notifications p {
+  color: #e2e8f0;
+}
+
+.dark .empty-notifications span {
+  color: #94a3b8;
 }
 </style>

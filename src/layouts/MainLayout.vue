@@ -32,20 +32,27 @@
                         <!-- <router-link to="/user-roles" class="nav-item" active-class="active">
                             <font-awesome-icon icon="user-tag" />
                             <span>Peran Pengguna</span>
-                        </router-link> -->
-                    </template>
+                        </router-link> -->                    </template>
                 </nav>
 
-                <div class="user-menu" @click="toggleUserMenu">
-                    <button class="user-menu-btn">
-                        <font-awesome-icon icon="user-circle" /> &nbsp; {{ userData ? userData.full_name : 'Pengguna' }}
-                    </button>
-                    <div v-if="showUserMenu" class="user-dropdown">
-                        <button v-if="isImpersonating" class="dropdown-item" @click="leaveImpersonation">
-                            <font-awesome-icon icon="user-secret" /> &nbsp; Keluar Impersonasi
+                <div class="right-section">
+                    <div class="theme-switch">
+                        <button @click.stop="themeStore.toggleTheme()" class="theme-button" :title="themeStore.isDark ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap'">
+                            <font-awesome-icon :icon="themeStore.isDark ? 'sun' : 'moon'" size="lg" />
                         </button>
-                        <router-link to="/profile" class="dropdown-item" active-class="active"><font-awesome-icon icon="user" /> &nbsp; Profil</router-link>
-                        <button @click.stop="logout" class="dropdown-item logout"><font-awesome-icon icon="sign-out-alt" /> &nbsp; Keluar</button>
+                    </div>
+
+                    <div class="user-menu" @click="toggleUserMenu">
+                        <button class="user-menu-btn">
+                            <font-awesome-icon icon="user-circle" /> &nbsp; {{ userData ? userData.full_name : 'Pengguna' }}
+                        </button>
+                        <div v-if="showUserMenu" class="user-dropdown">
+                            <button v-if="isImpersonating" class="dropdown-item" @click="leaveImpersonation">
+                                <font-awesome-icon icon="user-secret" /> &nbsp; Keluar Impersonasi
+                            </button>
+                            <router-link to="/profile" class="dropdown-item" active-class="active"><font-awesome-icon icon="user" /> &nbsp; Profil</router-link>
+                            <button @click.stop="logout" class="dropdown-item logout"><font-awesome-icon icon="sign-out-alt" /> &nbsp; Keluar</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -69,11 +76,13 @@
     </div>
 </template>
 
-<script setup>
-    import { useRouter } from 'vue-router';
+<script setup>    import { useRouter } from 'vue-router';
     import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
     import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
     import { authService } from '../api/services/authService';
+    import { useThemeStore } from '../stores/theme';
+
+    const themeStore = useThemeStore();
     import { successToast, errorToast, warningToast } from '@/utils/toast'
 
     // Data user
@@ -294,6 +303,39 @@
         padding: 0.5rem;
     }
 
+    .right-section {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .theme-switch {
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .theme-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--hover);
+        border: none;
+        padding: 8px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        color: var(--text-secondary);
+        transition: all 0.2s ease;
+    }
+
+    .theme-button:hover {
+        background: var(--hover-dark);
+        color: var(--text-primary);
+        transform: translateY(-1px);
+    }
+
     @media (max-width: 768px) {
         .header {
             padding: 0 1rem;
@@ -344,8 +386,18 @@
             margin-left: auto;
         }
 
+        .theme-switch {
+            order: 1;
+            margin-right: 0;
+            margin-left: 1rem;
+        }
+
         .main-content {
             padding: 1rem;
+        }
+
+        .right-section {
+            gap: 0.25rem;
         }
     }
 
