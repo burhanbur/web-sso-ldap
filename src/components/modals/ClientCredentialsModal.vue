@@ -2,7 +2,7 @@
   <div class="modal-overlay">
     <div class="modal modal-md">
       <div class="modal-header">
-        <h2>Kredensial Klien</h2>
+        <h2>Aplikasi Klien</h2>
         <button type="button" class="modal-close" @click="$emit('close')">
           <span>&times;</span>
         </button>
@@ -11,34 +11,17 @@
       <div class="modal-body">
         <div class="credentials-container">
           <div class="credential-group">
-            <label>Client ID</label>
+            <label>App ID</label>
             <div class="credential-input">
               <input 
                 :type="showClientId ? 'text' : 'password'" 
-                :value="clientId" 
+                :value="appId" 
                 readonly
               />
               <button @click="showClientId = !showClientId" class="toggle-visibility" type="button">
                 <font-awesome-icon :icon="showClientId ? 'eye-slash' : 'eye'" />
               </button>
-              <button @click="copyToClipboard(clientId)" class="copy-button" type="button">
-                <font-awesome-icon icon="copy" />
-              </button>
-            </div>
-          </div>
-
-          <div class="credential-group">
-            <label>Client Secret</label>
-            <div class="credential-input">
-              <input 
-                :type="showClientSecret ? 'text' : 'password'" 
-                :value="clientSecret" 
-                readonly
-              />
-              <button @click="showClientSecret = !showClientSecret" class="toggle-visibility" type="button">
-                <font-awesome-icon :icon="showClientSecret ? 'eye-slash' : 'eye'" />
-              </button>
-              <button @click="copyToClipboard(clientSecret)" class="copy-button" type="button">
+              <button @click="copyToClipboard(appId)" class="copy-button" type="button">
                 <font-awesome-icon icon="copy" />
               </button>
             </div>
@@ -58,18 +41,13 @@ import { ref } from 'vue';
 import { successToast } from '@/utils/toast';
 
 const props = defineProps({
-  clientId: {
+  appId: {
     type: String,
     required: true
   },
-  clientSecret: {
-    type: String,
-    required: true
-  }
 });
 
 const showClientId = ref(false);
-const showClientSecret = ref(false);
 
 const copyToClipboard = async (text) => {
   try {
