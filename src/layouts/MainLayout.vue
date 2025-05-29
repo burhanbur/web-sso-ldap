@@ -32,7 +32,8 @@
                         <!-- <router-link to="/user-roles" class="nav-item" active-class="active">
                             <font-awesome-icon icon="user-tag" />
                             <span>Peran Pengguna</span>
-                        </router-link> -->                    </template>
+                        </router-link> -->                    
+                    </template>
                 </nav>
 
                 <div class="right-section">
@@ -44,7 +45,7 @@
 
                     <div class="user-menu" @click="toggleUserMenu">
                         <button class="user-menu-btn">
-                            <font-awesome-icon icon="user-circle" /> &nbsp; {{ userData ? userData.full_name : 'Pengguna' }}
+                            <font-awesome-icon icon="user-circle" /> &nbsp; {{ name ? name : 'Pengguna' }}
                         </button>
                         <div v-if="showUserMenu" class="user-dropdown">
                             <button v-if="isImpersonating" class="dropdown-item" @click="leaveImpersonation">
@@ -76,28 +77,22 @@
     </div>
 </template>
 
-<script setup>    import { useRouter } from 'vue-router';
+<script setup>    
+    import { useRouter } from 'vue-router';
     import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
     import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
     import { authService } from '../api/services/authService';
     import { useThemeStore } from '../stores/theme';
+    import { useAuthStore } from '@/stores/auth';
     import { successToast, errorToast, warningToast } from '@/utils/toast'
 
+    const router = useRouter();
     const themeStore = useThemeStore();
+    const authStore = useAuthStore();
 
     // Data user
     const userData = ref(null);
     const isLoading = ref(true);
-
-    // Cek apakah user adalah admin
-    const isAdminUser = computed(() => {
-        if (!userData.value || !userData.value.app_access) return false;
-        
-        const ssoApp = userData.value.app_access.find(app => (app.code === 'SSO' || app.code === 'sso'));
-        if (!ssoApp) return false;
-        
-        return ssoApp.roles.some(role => role.code === 'admin');
-    });
 
     // Fetch data user
     const fetchUserData = async () => {
@@ -112,40 +107,26 @@
         }
     };
 
-    const router = useRouter();
     const isMenuOpen = ref(false);
     const showUserMenu = ref(false);
-    let isImpersonating = ref(localStorage.getItem('impersonated_by') ? true : false);
+    const isImpersonating = computed(() => authStore.isImpersonating);
+    const name = computed(() => authStore.fullName);
+    const isAdminUser = computed(() => authStore.isAdmin);
+
+    // console.log(authStore.isUserLoaded)
+    // console.log(authStore.isUserImpersonating)
 
     const logout = async () => {
-        const logout = await authService.logout();
-
-        if (logout.data.success) {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('impersonated_by');
-            successToast(logout.data.message);
-            router.push('/login');
-        } else {
-            const message =
-                error.response?.data?.message ||
-                error.message ||
-                'Logout gagal. Silakan coba lagi nanti.'
-
-            errorToast(message)
-        }
+        await authStore.logout();
     }
 
     const leaveImpersonation = async () => {
         try {
-            const response = await authService.leaveImpersonateUser();
+            const response = await authStore.stopImpersonating();
 
-            if (response && response.data && response.data.data) {
-                localStorage.removeItem('impersonated_by');
-                localStorage.setItem('access_token', response.data.data.access_token);
-                window.location.reload();
+            if (response) {
                 successToast('Berhasil keluar impersonasi pengguna.');
-            } else {
-                errorToast('Gagal keluar impersonasi pengguna. Silakan coba lagi nanti.');
+                router.push('/profile');
             }
         } catch (error) {
             const message =

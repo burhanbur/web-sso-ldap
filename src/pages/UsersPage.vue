@@ -469,6 +469,7 @@
     import { useRouter, useRoute } from 'vue-router';
     import { authService } from '../api/services/authService';
     import { userService } from '../api/services/userService';
+    import { useAuthStore } from '@/stores/auth';
     import { applicationService } from '../api/services/applicationService';
     import { roleService } from '../api/services/roleService';
     import debounce from 'lodash/debounce';
@@ -483,6 +484,7 @@
     });
 
     const router = useRouter();
+    const authStore = useAuthStore();
 
     let availableApps = reactive([]);
     let availableRoles = reactive([]);
@@ -639,13 +641,12 @@
 
       if (result.isConfirmed) {
         try {
-          const response = await authService.startImpersonateUser(user.uuid);
+          const response = await authStore.impersonateUser(user.uuid);
 
-          if (response && response.data && response.data.data) {
-            localStorage.setItem('impersonated_by', user.uuid);
-            localStorage.setItem('access_token', response.data.data.access_token);
-            window.location.reload();
+          if (response) {
             successToast('Berhasil masuk sebagai impersonasi pengguna.');
+
+            router.push('/dashboard');
           } else {
             errorToast('Gagal masuk sebagai impersonasi pengguna.');
           }

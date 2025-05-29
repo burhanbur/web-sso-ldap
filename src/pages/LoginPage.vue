@@ -51,14 +51,6 @@
                         <font-awesome-icon icon="sign-in-alt" /> &nbsp; {{ loading ? 'Logging in...' : 'Login' }}
                     </button>
                 </form>
-
-                <!-- <div v-if="errorMsg" class="error-message">
-                    {{ errorMsg }}
-                </div>
-
-                <div v-if="successMsg" class="success-message">
-                    {{ successMsg }}
-                </div> -->
             </div>
         </div>
     </div>
@@ -66,54 +58,36 @@
 
 <script setup>
     import { ref, onMounted } from 'vue';
-    import { useRouter, useRoute } from 'vue-router';
-    import { authService } from '../api/services/authService';
+    import { useRouter } from 'vue-router';
+    import { useAuthStore } from '@/stores/auth';
     import { successToast, errorToast, warningToast } from '@/utils/toast'
 
     const router = useRouter();
-    const route = useRoute();
     const username = ref('');
     const password = ref('');
     const loading = ref(false);
-    const errorMsg = ref('');
-    const successMsg = ref('');
     const showPassword = ref(false);
 
+    const authStore = useAuthStore();
+
     const handleLogin = async () => {
-        errorMsg.value = '';
         try {
             loading.value = true;
-            const response = await authService.login(username.value, password.value);
+            const response = await authStore.login(username.value, password.value);
 
-            const errMessage = 'Login gagal. Periksa kembali email atau kata sandi Anda.';
             if (!response) {
-                throw new Error(errMessage);
+                throw new Error();
             }
 
-            if (!response.data.access_token) {
-                throw new Error(errMessage);
-            }
-
-            localStorage.setItem('access_token', response.data.access_token);
             successToast('Verifikasi identitas berhasil.');
             router.push('/dashboard');
         } catch (error) {
-            const message = 'Login gagal. Periksa kembali data Anda.';
-            
+            const message = error?.response?.data?.message || 'Login gagal. Periksa kembali data Anda.';
             errorToast(message);
-            // errorMsg.value = error || 'Invalid username or password';
         } finally {
             loading.value = false;
         }
     }
-
-    onMounted(() => {
-        const msg = sessionStorage.getItem('successMsg');
-        if (msg) {
-            successMsg.value = msg;
-            sessionStorage.removeItem('successMsg');
-        }
-    });
 </script>
 
 <style scoped>

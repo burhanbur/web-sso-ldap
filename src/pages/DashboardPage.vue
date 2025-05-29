@@ -3,7 +3,8 @@
         <div class="header-content">
           <div class="header-title">
             <h2>📊 Selamat datang di Central Authentication Universitas Pertamina</h2>
-          </div>          <div class="header-actions">
+          </div>          
+          <div class="header-actions">
             <div class="notification-wrapper">
               <button @click="toggleNotifications" class="notification-button" :class="{ 'has-unread': hasUnreadNotifications }">
                 <font-awesome-icon icon="bell" size="lg" />
@@ -229,8 +230,6 @@ onUnmounted(() => {
   font-family: 'Inter', sans-serif;
   color: var(--text-color);
 }
-
-
 
 .dashboard-header {
   margin-bottom: 2rem;

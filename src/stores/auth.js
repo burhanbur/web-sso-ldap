@@ -2,30 +2,34 @@
 import { defineStore } from 'pinia';
 import { authService } from '../api/services/authService';
 import router from '../router';
+import { errorToast, successToast, warningToast } from '@/utils/toast';
 
 export const useAuthStore = defineStore('auth', {
   // State
   state: () => ({
     user: null,
-    isLoading: false,
     isUserLoaded: false,
+    isLoading: false,
     loadError: null,
     refreshPromise: null,
-    isRefreshing: false
+    isRefreshing: false,
+    isUserImpersonating: false,
+    impersonatedBy: null,
   }),
 
   // Getters
   getters: {
-    isAuthenticated: (state) => !!state.user || !!localStorage.getItem('access_token'),
+    isAuthenticated: (state) => !!state.user,
+    isImpersonating: (state) => state.isUserImpersonating,
     isAdmin: (state) => {
       if (!state.user || !state.user.app_access) return false;
       
-      const ssoApp = state.user.app_access.find(app => app.code === 'SSO');
+      const ssoApp = state.user.app_access.find(app => app.code === 'SSO' || app.code === 'sso');
       if (!ssoApp) return false;
       
       return ssoApp.roles.some(role => role.code === 'admin');
     },
-    fullName: (state) => state.user?.name || '',
+    fullName: (state) => state.user?.full_name || '',
     email: (state) => state.user?.email || '',
     roles: (state) => {
       if (!state.user || !state.user.app_access) return [];
@@ -69,10 +73,17 @@ export const useAuthStore = defineStore('auth', {
       try {
         const response = await authService.me();
         this.user = response.data.data;
+        
+        // Check impersonation status from user data or custom claims
+        const impersonatedBy = response.data.data.impersonated_by;
+        this.isUserImpersonating = !!impersonatedBy;
+        this.impersonatedBy = impersonatedBy || null;
+        
         this.isUserLoaded = true;
         return this.user;
       } catch (error) {
         console.error('Error fetching user data:', error);
+        errorToast(error);
         this.loadError = error;
         
         // Logout jika error 401 (token tidak valid)
@@ -86,69 +97,25 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     
-    // Cek dan refresh token jika perlu
-    async checkAndRefreshToken() {
-      const token = localStorage.getItem('access_token');
-      
-      // Cek apakah token sudah expired
-      const isTokenExpired = () => {
-        if (!token) return true;
-        
-        try {
-          // Parse token untuk mendapatkan payload
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          
-          // Cek apakah token memiliki exp claim
-          if (!payload || !payload.exp) return false;
-          
-          // Bandingkan waktu expired dengan waktu sekarang (dalam detik)
-          // dengan buffer 60 detik
-          const currentTime = Math.floor(Date.now() / 1000);
-          return payload.exp < (currentTime + 60);
-        } catch (error) {
-          console.error('Error parsing token:', error);
-          return true; // Anggap expired jika format token tidak valid
-        }
-      };
-      
-      // Refresh token jika expired dan belum dalam proses refresh
-      if (!this.isRefreshing && token && isTokenExpired()) {
-        this.isRefreshing = true;
-        
-        try {
-          const response = await authService.refreshToken();
-          const { access_token } = response.data;
-          localStorage.setItem('access_token', access_token);
-          return access_token;
-        } catch (error) {
-          if (error.response?.status === 401) {
-            this.clearSession();
-            router.push('/login');
-          }
-          throw error;
-        } finally {
-          this.isRefreshing = false;
-          this.refreshPromise = null;
-        }
-      }
-      
-      return token;
-    },
-    
     // Login
-    async login(credentials) {
+    async login(username, password) {
       try {
-        const response = await authService.login(credentials);
-        const { access_token } = response.data;
-        
-        localStorage.setItem('access_token', access_token);
-        
-        // Fetch user data setelah login
-        await this.fetchUserData(true);
+        let userData = null;
+        const response = await authService.login(username, password);
+
+        if (response && response.data.success) {
+          // Fetch user data setelah login
+          userData = await this.fetchUserData(true);
+          if (!userData) {
+            throw new Error('Failed to fetch user data');
+          }
+        } else {
+          throw new Error(response.data.message);
+        }
         
         return true;
       } catch (error) {
-        console.error('Login error:', error);
+        errorToast(error);
         throw error;
       }
     },
@@ -156,13 +123,14 @@ export const useAuthStore = defineStore('auth', {
     // Logout
     async logout() {
       try {
-        await authService.logout();
+        const response = await authService.logout();
         this.clearSession();
-        return true;
+        successToast(response.data.message);
+        router.push('/login');
       } catch (error) {
-        console.error('Logout error:', error);
         // Tetap clear session meskipun API logout gagal
         this.clearSession();
+        errorToast(error);
         throw error;
       }
     },
@@ -171,45 +139,38 @@ export const useAuthStore = defineStore('auth', {
     clearSession() {
       this.user = null;
       this.isUserLoaded = false;
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('impersonated_by');
+      this.isUserImpersonating = false;
+      this.impersonatedBy = null;
     },
     
     // Impersonate user (untuk fitur admin)
     async impersonateUser(userId) {
       try {
-        const response = await authService.impersonate(userId);
-        const { access_token } = response.data;
-        
-        // Simpan token admin asli untuk kembali nanti
-        localStorage.setItem('impersonated_by', localStorage.getItem('access_token'));
-        localStorage.setItem('access_token', access_token);
+        const response = await authService.startImpersonateUser(userId);
         
         // Refresh user data
         await this.fetchUserData(true);
         
         return true;
       } catch (error) {
-        console.error('Impersonation error:', error);
+        errorToast(error);
         throw error;
       }
     },
     
     // Berhenti impersonate
     async stopImpersonating() {
-      const originalToken = localStorage.getItem('impersonated_by');
-      
-      if (originalToken) {
-        localStorage.setItem('access_token', originalToken);
-        localStorage.removeItem('impersonated_by');
+      try {
+        const response = await authService.leaveImpersonateUser();
         
         // Refresh user data
         await this.fetchUserData(true);
         
         return true;
+      } catch (error) {
+        errorToast(error);
+        throw error;
       }
-      
-      return false;
     }
   }
 });

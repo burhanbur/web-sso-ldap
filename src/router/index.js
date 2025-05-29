@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { authService } from '../api/services/authService';
+import { useAuthStore } from '@/stores/auth';
 
 import MainLayout from '../layouts/MainLayout.vue';
 import AuthLayout from '../layouts/AuthLayout.vue';
@@ -94,43 +95,35 @@ const router = createRouter({
 });
 
 // Navigation guard
-router.beforeEach((to, from, next) => {
-    const isAuthenticated = !!localStorage.getItem('access_token');
+router.beforeEach(async (to, from, next) => {
+    const authStore = useAuthStore();
+    const isGuestRoute = to.matched.some(record => record.meta.requiresGuest);
+    
+    // Jika bukan guest route dan user belum dimuat, coba muat data user
+    if (!isGuestRoute && !authStore.isUserLoaded) {
+        try {
+            await authStore.fetchUserData();
+        } catch (error) {
+            // Jika error, anggap tidak terautentikasi
+            console.log('Failed to fetch user data:', error);
+        }
+    }
+
+    const isAuthenticated = authStore.isAuthenticated;
 
     // Handle routes that require authentication
     if (to.matched.some(record => record.meta.requiresAuth)) {
         if (!isAuthenticated) {
             return next('/login');
         }
-        
-        // For protected routes, check admin status
-        authService.me()
-            .then(response => {
-                const currentUser = response.data.data;
-                
-                // Check if user is admin
-                let isAdmin = false;
-                if (currentUser && currentUser.app_access) {
-                    const ssoApp = currentUser.app_access.find(app => (app.code === 'SSO' || app.code === 'sso'));
-                    if (ssoApp) {
-                        isAdmin = ssoApp.roles.some(role => role.code === 'admin');
-                    }
-                }
-                
-                // Check if route requires admin privileges
-                if (to.matched.some(record => record.meta.requiresAdmin) && !isAdmin) {
-                    next('/dashboard');
-                } else {
-                    next();
-                }
-            })
-            .catch(error => {
-                errorToast(error);
-                // If there's an error fetching user data, redirect to login
-                // localStorage.removeItem('access_token');
-                next('/dashboard');
-                // next('/login');
-            });
+
+        let isAdmin = authStore.isAdmin;
+
+        if (to.matched.some(record => record.meta.requiresAdmin) && !isAdmin) {
+            next('/dashboard');
+        } else {
+            next();
+        }
     } 
     // Handle guest-only routes
     else if (to.matched.some(record => record.meta.requiresGuest)) {
