@@ -81,9 +81,9 @@
     import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
     import { authService } from '../api/services/authService';
     import { useThemeStore } from '../stores/theme';
+    import { successToast, errorToast, warningToast } from '@/utils/toast'
 
     const themeStore = useThemeStore();
-    import { successToast, errorToast, warningToast } from '@/utils/toast'
 
     // Data user
     const userData = ref(null);

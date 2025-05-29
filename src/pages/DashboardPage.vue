@@ -96,10 +96,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { applicationService } from '../api/services/applicationService';
 import { userService } from '../api/services/userService';
 import { notificationService } from '../api/services/notificationService';
-import { useThemeStore } from '../stores/theme';
 import { errorToast } from '@/utils/toast';
-
-const themeStore = useThemeStore();
 
 const applications = ref([]);
 const latestUsers = ref([]);
