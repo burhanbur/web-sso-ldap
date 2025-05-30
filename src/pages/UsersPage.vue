@@ -559,7 +559,6 @@
 
         successToast(response.data.message || 'Impor data pengguna berhasil.');
       } catch (error) {
-        console.log('Error:', error);
         errorToast(error);
       }
     }
@@ -616,6 +615,8 @@
         totalUsers.value = response.data.pagination.total;
         currentPage.value = response.data.pagination.current_page;
         lastPage.value = response.data.pagination.last_page;
+
+        return response;
       } catch (error) {
         const message =
           error.response?.data?.message ||
@@ -685,7 +686,6 @@
         const response = await roleService.getRoles(params);
         availableRoles = response.data.data;
       } catch (error) {
-        console.error('Failed to fetch roles:', error);
         errorToast(error);
       }
     }
@@ -699,7 +699,6 @@
         const response = await applicationService.getApplications(params);
         availableApps = response.data.data;
       } catch (error) {
-        console.error('Failed to fetch roles:', error);
         errorToast(error);
       }
     }
@@ -709,7 +708,6 @@
         const response = await roleService.getEntityTypes();
         availableEntityTypes = response.data.data;
       } catch (error) {
-        console.error('Failed to fetch roles:', error);
         errorToast(error);
       }
     }
@@ -724,7 +722,6 @@
         const response = await userService.generateUsername(formData.full_name, formData.type);
         formData.username = response.data.data;
       } catch (error) {
-        console.error('Failed to generate username:', error);
         errorToast(error);
       }
     }
@@ -830,7 +827,6 @@
 
         successToast(`Status pengguna ${user.full_name} diubah menjadi ${newStatus}.`);
       } catch (error) {
-        console.error('Failed to update user status:', error);
         errorToast(error);
       }
     }
@@ -848,7 +844,6 @@
         closeModal();
         successToast(response.data?.message);
       } catch (error) {
-        console.error('Failed to save user:', error);
         errorToast(error);
       }
     }
@@ -971,11 +966,14 @@
     }
     /* end: filter, search and pagination */
 
-    onMounted(() => {
-      fetchUsers();
-      fetchRoles();
-      fetchApps();
-      fetchEntityTypes();
+    onMounted(async () => {
+      const resp = await fetchUsers();
+
+      if (resp && resp.data.success) {
+        fetchRoles();
+        fetchApps();
+        fetchEntityTypes();
+      }
     });
 </script>
 

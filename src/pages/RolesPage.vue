@@ -202,8 +202,9 @@
         totalRoles.value = response.data.pagination.total;
         currentPage.value = response.data.pagination.current_page;
         lastPage.value = response.data.pagination.last_page;
+
+        return response;
       } catch (error) {
-        console.error('Failed to fetch roles:', error);
         errorToast(error);
       } finally {
         loading.value = false;
@@ -215,7 +216,6 @@
         const response = await roleService.getRoleTypes();
         roleTypes = response.data.data;
       } catch (error) {
-        console.error('Failed to fetch role types:', error);
         errorToast(error);
       }
     }
@@ -225,7 +225,6 @@
         const response = await roleService.getScopes();
         scopeTypes = response.data.data;
       } catch (error) {
-        console.error('Failed to fetch scope types:', error);
         errorToast(error);
       }
     }
@@ -281,7 +280,6 @@
         closeModal();
         successToast(response.data.message);
       } catch (error) {
-        console.error('Failed to save role:', error);
         errorToast(error);
       }
     }
@@ -343,10 +341,13 @@
       fetchRoles();
     }
 
-    onMounted(() => {
-      fetchRoles();
-      fetchRoleTypes();
-      fetchScopeTypes();
+    onMounted( async () => {
+      const resp = await fetchRoles();
+      
+      if (resp && resp.data.success) {
+        fetchRoleTypes();
+        fetchScopeTypes();
+      }
     });
 </script>
 

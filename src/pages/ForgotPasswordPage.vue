@@ -63,7 +63,6 @@
             message.value = 'Reset password link has been sent to your email';
             email.value = '';
         } catch (error) {
-            console.error('Forgot password failed:', error);
             isSuccess.value = false;
             message.value = error.response?.data?.message || 'Failed to process request. Please try again.';
         } finally {

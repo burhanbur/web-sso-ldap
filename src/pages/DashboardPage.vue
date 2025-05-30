@@ -118,9 +118,10 @@ const fetchApplications = async () => {
   try {
     const response = await applicationService.getMyApplications();
     applications.value = response.data.data;
+
+    return response;
   } catch (error) {
     errorToast(error)
-    console.error('Failed to fetch applications:', error);
   } finally {
     loadingApps.value = false;
   }
@@ -131,7 +132,7 @@ const fetchLatestUsers = async () => {
         const response = await userService.getLatestUsers();
         latestUsers.value = response.data.data;
     } catch (error) {
-        console.error('Failed to fetch latest users:', error);
+        errorToast(error);
     } finally {
         loadingUsers.value = false;
     }
@@ -210,11 +211,14 @@ const handleClickOutside = (event) => {
   }
 };
 
-onMounted(() => {
-    fetchApplications();
+onMounted(async () => {
+    const resp = await fetchApplications();
     // fetchLatestUsers();
     document.addEventListener('click', handleClickOutside);
-    fetchNotifications(); // Initial fetch
+
+    if (resp && resp.data.success) {
+      await fetchNotifications();
+    }
 });
 
 onUnmounted(() => {

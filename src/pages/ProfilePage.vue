@@ -341,7 +341,6 @@
       closeModal();
       successToast(response.data?.message);
     } catch (error) {
-      console.error('Failed to save user:', error);
       errorToast(error);
     }
   }

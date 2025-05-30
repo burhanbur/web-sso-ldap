@@ -438,7 +438,6 @@
           currentPage.value = response.data.pagination.current_page;
           lastPage.value = response.data.pagination.last_page;
       } catch (error) {
-          console.error('Failed to fetch applications:', error);
           errorToast(error);
       } finally {
           loading.value = false;
@@ -492,7 +491,6 @@
         successToast(`Status aplikasi diubah menjadi ${app.is_active ? 'Aktif' : 'Tidak Aktif'}`);
       } catch (error) {
         app.is_active = original
-        console.error('Failed to toggle application status:', error);
         errorToast(error);
       }
     }
@@ -539,7 +537,6 @@
         closeModal();
         successToast(response.data.message);
       } catch (error) {
-          console.error('Failed to save application:', error);
           errorToast(error);
       }
     }

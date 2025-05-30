@@ -82,8 +82,12 @@ export const useAuthStore = defineStore('auth', {
         this.isUserLoaded = true;
         return this.user;
       } catch (error) {
-        console.error('Error fetching user data:', error);
-        errorToast(error);
+        let message = error;
+        if (error && error.response && error.response.data && error.response.data.message) {
+          message = error.response.data.message;
+        }
+
+        errorToast(message);
         this.loadError = error;
         
         // Logout jika error 401 (token tidak valid)
@@ -125,13 +129,18 @@ export const useAuthStore = defineStore('auth', {
       try {
         const response = await authService.logout();
         this.clearSession();
-        successToast(response.data.message);
+
+        if (response && response.data.success) {
+          successToast(response.data.message);
+        } else {
+          errorToast('Sesi login gagal dihapus. Silakan coba lagi.');
+        }
         router.push('/login');
       } catch (error) {
         // Tetap clear session meskipun API logout gagal
         this.clearSession();
         errorToast(error);
-        throw error;
+        router.push('/login');
       }
     },
     
