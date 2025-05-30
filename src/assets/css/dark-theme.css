@@ -59,6 +59,10 @@
   --profile-stat-value: #007bff;
 }
 
+.dark .swal2-title {
+  color: var(--profile-bg-main);
+}
+
 /* Dark theme element styles */
 .dark h1,
 .dark h2,

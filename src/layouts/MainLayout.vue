@@ -2,10 +2,10 @@
     <div class="auth-layout">
         <header class="header">
             <div class="header-content">
-                <div class="brand">
+                <router-link to="/dashboard" class="brand">
                     <img src="../assets/logo.png" alt="Logo" class="logo" />
                     <span class="brand-text">CENTRAL</span>
-                </div>
+                </router-link>
                 <button class="hamburger-btn" @click="toggleMenu" aria-label="Toggle menu">
                     <font-awesome-icon :icon="isMenuOpen ? 'times' : 'bars'" />
                 </button>
