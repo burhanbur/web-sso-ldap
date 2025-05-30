@@ -50,7 +50,7 @@
   --info: #0dcaf0;
   
   /* Text colors */
-  --text-primary: #212529;
+  --text-primary: #333;
   --text-secondary: #6c757d;
   --text-light: #f8f9fa;
   --text-muted: #6c757d;
@@ -67,6 +67,13 @@
   /* Layout */
   --section-gap: 2rem;
   --container-max-width: 1400px;
+
+  /* Profile */
+  --profile-bg-top-bottom: #f8f9fa;
+  --profile-bg-main: #fff;
+  --profile-text-label: #6c757d;
+  --profile-text-value: #333;
+  --profile-stat-value: #007bff;
 }
 
 /* semantic color variables for this project */
@@ -94,19 +101,6 @@
     --color-heading: var(--vt-c-text-dark-1);
     --color-text: var(--vt-c-text-dark-2);
   }
-}
-
-/* Dark theme */
-:root.dark {
-  --text-color: #e5e7eb;
-  --text-secondary: #94a3b8;
-  --bg-color: #1a1a1a;
-  --card-bg: #262626;
-  --border-color: #404040;
-  --header-bg: #262626;
-  --surface: #262626;
-  --hover: #374151;
-  --hover-dark: #4b5563;
 }
 
 /* Reset */
@@ -140,42 +134,6 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Dark mode adjustments for common elements */
-.dark a {
-  color: var(--primary);
-}
-
-.dark .card,
-.dark .dropdown-menu,
-.dark .modal-content {
-  background: var(--card-bg);
-  border-color: var(--border-color);
-}
-
-.dark input,
-.dark select,
-.dark textarea {
-  background-color: var(--bg-color);
-  border-color: var(--border-color);
-  color: var(--text-color);
-}
-
-.dark table {
-  color: var(--text-color);
-}
-
-.dark th {
-  background-color: var(--card-bg);
-}
-
-.dark tr:nth-child(even) {
-  background-color: var(--card-bg);
-}
-
-.dark tr:hover {
-  background-color: var(--hover);
-}
-
 /* Base elements */
 a {
   text-decoration: none;
@@ -194,5 +152,7 @@ button {
   cursor: pointer;
   border: none;
   background: none;
-  padding: 0;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
 }

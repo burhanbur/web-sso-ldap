@@ -19,7 +19,9 @@ export const useThemeStore = defineStore('theme', {
         this.isDark = savedTheme === 'dark';
       } else {
         // Check system preference
-        this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        this.isDark = window.matchMedia('(prefers-color-scheme: light)').matches;
+        // this.isDark = false;
+        // localStorage.setItem('theme', 'light');
       }
       document.documentElement.classList.toggle('dark', this.isDark);
     }

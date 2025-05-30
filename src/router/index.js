@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { authService } from '../api/services/authService';
 import { useAuthStore } from '@/stores/auth';
 
 import MainLayout from '../layouts/MainLayout.vue';
@@ -14,7 +13,6 @@ import UserRolesPage from '../pages/UserRolesPage.vue';
 import ProfilePage from '../pages/ProfilePage.vue';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage.vue';
 import ResetPasswordPage from '../pages/ResetPasswordPage.vue';
-import { errorToast } from '@/utils/toast';
 
 const routes = [
     {

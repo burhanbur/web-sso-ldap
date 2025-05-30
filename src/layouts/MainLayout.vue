@@ -113,9 +113,6 @@
     const name = computed(() => authStore.fullName);
     const isAdminUser = computed(() => authStore.isAdmin);
 
-    // console.log(authStore.isUserLoaded)
-    // console.log(authStore.isUserImpersonating)
-
     const logout = async () => {
         await authStore.logout();
     }
@@ -218,7 +215,7 @@
         align-items: center;
         gap: 0.5rem;
         padding: 0.5rem 1rem;
-        color: var(--text-secondary);
+        color: var(--text-primary);
         text-decoration: none;
         border-radius: 4px;
         transition: all 0.2s;
@@ -398,7 +395,7 @@
       position: absolute;
       right: 0;
       top: 100%;
-      background: white;
+      /* background: var(--text-primary); */
       border: 1px solid var(--border);
       border-radius: 4px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -411,7 +408,7 @@
     .dropdown-item {
       padding: 1rem 1rem;
       text-align: left;
-      background: none;
+      background: var(--surface);
       border: none;
       color: var(--text-primary);
       font-size: 0.9rem;
@@ -428,28 +425,28 @@
     }
 
     .footer {
-    background-color: var(--surface);
-    border-top: 1px solid var(--border);
-    padding: 1rem 2rem;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    text-align: center;
+        background-color: var(--surface);
+        border-top: 1px solid var(--border);
+        padding: 1rem 2rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        text-align: center;
     }
 
     .footer a {
-    color: var(--primary);
-    text-decoration: none;
+        color: var(--primary);
+        text-decoration: none;
     }
 
     .footer a:hover {
-    text-decoration: underline;
+        text-decoration: underline;
     }
 
     .footer-content {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
     }
 </style>

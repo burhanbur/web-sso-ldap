@@ -1,0 +1,143 @@
+/* Dark theme styles */
+:root.dark {
+  /* Base colors */
+  --text-color: #e5e7eb;
+  --text-secondary: #94a3b8;
+  --text-primary: #e5e7eb;
+
+  --bg-color: #121212;
+  --card-bg: #1e1e1e;
+  --border-color: #404040;
+  --header-bg: #1e1e1e;
+  --surface: #1e1e1e;
+  
+  /* Interactive states */
+  --border: #121212;
+  --hover: #2c2c2c;
+  --hover-dark: #363636;
+  --active: #404040;
+  
+  /* Primary colors */
+  --primary: #60a5fa;
+  --primary-hover: #3b82f6;
+  --primary-active: #2563eb;
+  
+  /* Status colors */
+  --success: #22c55e;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+  
+  /* Input elements */
+  --input-bg: #262626;
+  --input-border: #404040;
+  --input-placeholder: #6b7280;
+  --input-focus-border: #60a5fa;
+  
+  /* Overlay elements */
+  --modal-overlay: rgba(0, 0, 0, 0.7);
+  --dropdown-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  
+  /* Text colors for specific elements */
+  --heading-color: #fff;
+  --notification-text: #e5e7eb;
+  --dashboard-title: #fff;
+  --dashboard-subtitle: #94a3b8;
+  
+  /* Scroll bar */
+  --scrollbar-track: #262626;
+  --scrollbar-thumb: #404040;
+  --scrollbar-thumb-hover: #4a4a4a;
+
+  --background: #212020;
+
+  /* Profile */
+  --profile-bg-top-bottom: #191919;
+  --profile-bg-main: #2c2c2c;
+  --profile-text-label: #e5e7eb;
+  --profile-text-value: #fff;
+  --profile-stat-value: #007bff;
+}
+
+/* Dark theme element styles */
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6 {
+  color: var(--heading-color);
+}
+
+.dark .notification-title,
+.dark .notification-text {
+  color: var(--notification-text);
+}
+
+.dark .dashboard-title {
+  color: var(--dashboard-title);
+}
+
+.dark .dashboard-subtitle {
+  color: var(--dashboard-subtitle);
+}
+
+/* Dark mode adjustments for common elements */
+.dark a {
+  color: var(--primary);
+}
+
+.dark .card,
+.dark .dropdown-menu,
+.dark .modal-content {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--text-color);
+}
+
+.dark table {
+  color: var(--text-color);
+}
+
+.dark th {
+  background-color: var(--card-bg);
+}
+
+.dark tr:nth-child(even) {
+  background-color: var(--card-bg);
+}
+
+.dark tr:hover {
+  background-color: var(--hover);
+}
+
+/* Button styles in dark mode */
+.dark button:not(.primary) {
+  color: var(--text-color);
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+}
+
+.dark button:not(.primary):hover {
+  background-color: var(--hover);
+}
+
+.dark button.primary {
+  background-color: var(--primary);
+  color: white;
+}
+
+.dark button.primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.dark button.primary:active {
+  background-color: var(--primary-active);
+}

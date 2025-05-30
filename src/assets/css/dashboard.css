@@ -1,0 +1,72 @@
+/* Dashboard styles */
+.dashboard-header {
+  margin-bottom: 2rem;
+}
+
+.header-title h2,
+.dashboard-welcome {
+  color: var(--text-color);
+  transition: color 0.3s ease;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.notification-header h3 {
+  color: var(--text-color);
+  transition: color 0.3s ease;
+}
+
+.dashboard-section h2 {
+  color: var(--text-color);
+  transition: color 0.3s ease;
+}
+
+.notification-text {
+  color: var(--text-color);
+  transition: color 0.3s ease;
+}
+
+.notification-time {
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+.empty-notifications {
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+.empty-text p {
+  color: var(--text-color);
+  transition: color 0.3s ease;
+}
+
+.empty-text span {
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+/* Dark theme specific overrides */
+.dark .header-title h2,
+.dark .notification-header h3,
+.dark .dashboard-section h2 {
+  color: var(--heading-color);
+}
+
+.dark .notification-text {
+  color: var(--notification-text);
+}
+
+.dark .notification-time,
+.dark .empty-notifications {
+  color: var(--text-secondary);
+}
+
+.dark .empty-text p {
+  color: var(--heading-color);
+}
+
+.dark .empty-text span {
+  color: var(--text-secondary);
+}

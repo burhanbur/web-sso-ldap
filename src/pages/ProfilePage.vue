@@ -360,7 +360,6 @@
 .page-title {
   font-size: 1.8rem;
   font-weight: 600;
-  color: #333;
   margin-bottom: 1.5rem;
 }
 
@@ -373,7 +372,7 @@
 }
 
 .profile-card, .stats-card {
-  background-color: #fff;
+  background-color: var(--profile-bg-main);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   overflow: hidden;
@@ -384,7 +383,7 @@
   display: flex;
   align-items: center;
   padding: 1.5rem;
-  background-color: #f8f9fa;
+  background-color: var(--profile-bg-top-bottom);
   border-bottom: 1px solid #eaeaea;
 }
 
@@ -425,17 +424,18 @@
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0 0 0.3rem;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .profile-title {
-  color: #6c757d;
+  color: var(--text-secondary);
   font-size: 1rem;
 }
 
 /* Profile Body */
 .profile-body {
   padding: 1.5rem;
+  background-color: var(--profile-bg-main);
 }
 
 .profile-section {
@@ -445,7 +445,7 @@
 .section-title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #495057;
+  color: var(--text-primary);
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #eaeaea;
@@ -463,13 +463,13 @@
 
 .info-label {
   font-size: 0.85rem;
-  color: #6c757d;
+  color: var(--profile-text-label);
   margin-bottom: 0.3rem;
 }
 
 .info-value {
   font-weight: 500;
-  color: #333;
+  color: var(--profile-text-value);
 }
 
 .contact-info-grid {
@@ -484,13 +484,13 @@
 
 .contact-info-label {
   font-size: 0.85rem;
-  color: #6c757d;
+  color: var(--text-primary);
   margin-bottom: 0.3rem;
 }
 
 .contact-info-value {
   font-weight: 500;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .status-badge {
@@ -552,7 +552,7 @@
 .profile-footer {
   display: flex;
   padding: 1rem 1.5rem;
-  background-color: #f8f9fa;
+  background-color: var(--profile-bg-top-bottom);
   border-top: 1px solid #eaeaea;
   gap: 1rem;
 }
@@ -583,7 +583,7 @@
 .stats-title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #495057;
+  color: var(--text-primary);
   margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #eaeaea;
@@ -598,20 +598,20 @@
 .stat-item {
   text-align: center;
   padding: 1rem;
-  background-color: #f8f9fa;
+  background-color: var(--profile-bg-top-bottom);
   border-radius: 8px;
 }
 
 .stat-value {
   font-size: 1.8rem;
   font-weight: 600;
-  color: #007bff;
+  color: var(--profile-stat-value);
   margin-bottom: 0.5rem;
 }
 
 .stat-label {
   font-size: 0.9rem;
-  color: #6c757d;
+  color: var(--profile-text-label);
 }
 
 .password-group {

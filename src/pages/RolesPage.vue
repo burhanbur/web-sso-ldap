@@ -358,7 +358,7 @@
 }
 
 .code {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.9rem;
   margin-top: 0.2rem;
   font-family: monospace;
@@ -366,7 +366,7 @@
 
 .description {
   margin-top: 0.5rem;
-  color: #555;
+  color: var(--text-color);
   font-size: 0.9rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;

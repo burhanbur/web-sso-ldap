@@ -90,7 +90,7 @@
 .status-text {
     margin-left: 0.5rem;
     font-size: 0.85rem;
-    color: #333;
+    color: var(--text-color);
     font-weight: 600;
 }
 
@@ -129,7 +129,7 @@
 .loading {
     text-align: center;
     padding: 3rem;
-    color: #666;
+    color: var(--text-primary);
 }
 
 /* Form Group */
@@ -142,7 +142,7 @@
   margin-bottom: 0.35rem;
   font-weight: 500;
   font-size: 0.95rem;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .form-group input,

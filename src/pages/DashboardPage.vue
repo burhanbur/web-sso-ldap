@@ -1,96 +1,97 @@
-<template>    <div class="dashboard">
-      <header class="dashboard-header">
-        <div class="header-content">
-          <div class="header-title">
-            <h2>📊 Selamat datang di Central Authentication Universitas Pertamina</h2>
-          </div>          
-          <div class="header-actions">
-            <div class="notification-wrapper">
-              <button @click="toggleNotifications" class="notification-button" :class="{ 'has-unread': hasUnreadNotifications }">
-                <font-awesome-icon icon="bell" size="lg" />
-                <span v-if="unreadCount" class="notification-badge">{{ unreadCount }}</span>
-              </button>
-              <div v-if="showNotifications" class="notification-dropdown">
-                <div class="notification-header">
-                  <h3>Notifikasi</h3>
-                  <button v-if="notifications.length > 0" @click="markAllAsRead" class="mark-all-read">
-                    <font-awesome-icon icon="check-double" />
-                    <span>Tandai Semua Dibaca</span>
+<template>    
+  <div class="dashboard">
+    <header class="dashboard-header">
+      <div class="header-content">
+        <div class="header-title">
+          <h2 class="dashboard-welcome">📊 Selamat datang di Central Authentication Universitas Pertamina</h2>
+        </div>          
+        <div class="header-actions">
+          <div class="notification-wrapper">
+            <button @click="toggleNotifications" class="notification-button" :class="{ 'has-unread': hasUnreadNotifications }">
+              <font-awesome-icon icon="bell" size="lg" />
+              <span v-if="unreadCount" class="notification-badge">{{ unreadCount }}</span>
+            </button>
+            <div v-if="showNotifications" class="notification-dropdown">
+              <div class="notification-header">
+                <h3>Notifikasi</h3>
+                <button v-if="notifications.length > 0" @click="markAllAsRead" class="mark-all-read">
+                  <font-awesome-icon icon="check-double" />
+                  <span>Tandai Semua Dibaca</span>
+                </button>
+              </div>
+              <div class="notification-list" v-if="notifications.length > 0">
+                <div v-for="notification in notifications" 
+                      :key="notification.id" 
+                      class="notification-item"
+                      :class="{ 'unread': !notification.read_at }">
+                  <div class="notification-content" @click="readNotification(notification)">
+                    <p class="notification-text">{{ notification.content }}</p>
+                    <span class="notification-time">{{ formatTime(notification.created_at) }}</span>
+                  </div>
+                  <button @click.stop="deleteNotification(notification.uuid)" class="delete-notification" title="Hapus notifikasi">
+                    <font-awesome-icon icon="trash" size="sm" />
                   </button>
                 </div>
-                <div class="notification-list" v-if="notifications.length > 0">
-                  <div v-for="notification in notifications" 
-                       :key="notification.id" 
-                       class="notification-item"
-                       :class="{ 'unread': !notification.read_at }">
-                    <div class="notification-content" @click="readNotification(notification)">
-                      <p class="notification-text">{{ notification.content }}</p>
-                      <span class="notification-time">{{ formatTime(notification.created_at) }}</span>
-                    </div>
-                    <button @click.stop="deleteNotification(notification.uuid)" class="delete-notification" title="Hapus notifikasi">
-                      <font-awesome-icon icon="trash" size="sm" />
-                    </button>
-                  </div>
-                </div>
-                <div v-else class="empty-notifications">
-                  <font-awesome-icon icon="inbox" />
-                  <div class="empty-text">
-                    <p>Belum ada notifikasi</p>
-                    <span>Notifikasi baru akan muncul di sini</span>
-                  </div>
+              </div>
+              <div v-else class="empty-notifications">
+                <font-awesome-icon icon="inbox" />
+                <div class="empty-text">
+                  <p>Belum ada notifikasi</p>
+                  <span>Notifikasi baru akan muncul di sini</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </header>
-  
-      <section class="dashboard-section">
-        <h2>🌎&nbsp; Aplikasi yang Anda Gunakan</h2>
-        <div v-if="loadingApps" class="loading spinner-container"><div class="spinner"></div></div>
-        <div v-if="applications.length === 0 && !loadingApps" class="text-center"><h3>Tidak ada data yang ditemukan.</h3></div>
-        <div v-else class="layout-grid">
-          <div v-for="app in applications" :key="app.id">
-            <a style="color: inherit;" :href="app.login_url" target="_blank">
-              <div class="card">
-                <div class="app-content">
-                  <img :src="/*app.image ||*/ '/favicon.png'" :alt="app.name" class="app-logo" />
-                    <div class="app-info">
-                      <h3>{{ app.name }}</h3>
-                      <p class="code">{{ app.code }}</p>
-                      <div class="badges">
-                        <span class="badge platform">{{ app.platform_type }}</span>
-                        <span class="badge visibility">{{ app.visibility }}</span>
-                        <span :class="['badge', 'status', app.is_active ? 'active' : 'inactive']">
-                          {{ app.is_active ? 'Aktif' : 'Tidak Aktif' }}
-                        </span>
-                      </div>
-                    </div>
-                </div>
+      </div>
+    </header>
 
-                <div class="app-description">
-                  <p class="description">{{ app.description || 'Tidak ada deskripsi' }}</p>
-                </div>
+    <section class="dashboard-section">
+      <h2>🌎&nbsp; Aplikasi yang Anda Gunakan</h2>
+      <div v-if="loadingApps" class="loading spinner-container"><div class="spinner"></div></div>
+      <div v-if="applications.length === 0 && !loadingApps" class="text-center"><h3>Tidak ada data yang ditemukan.</h3></div>
+      <div v-else class="layout-grid">
+        <div v-for="app in applications" :key="app.id">
+          <a style="color: inherit;" :href="app.login_url" target="_blank">
+            <div class="card">
+              <div class="app-content">
+                <img :src="/*app.image ||*/ '/favicon.png'" :alt="app.name" class="app-logo" />
+                  <div class="app-info">
+                    <h3>{{ app.name }}</h3>
+                    <p class="code">{{ app.code }}</p>
+                    <div class="badges">
+                      <span class="badge platform">{{ app.platform_type }}</span>
+                      <span class="badge visibility">{{ app.visibility }}</span>
+                      <span :class="['badge', 'status', app.is_active ? 'active' : 'inactive']">
+                        {{ app.is_active ? 'Aktif' : 'Tidak Aktif' }}
+                      </span>
+                    </div>
+                  </div>
               </div>
-            </a>
-          </div>
-        </div>
-      </section>
-  
-      <!-- <section class="dashboard-section">
-        <h2>🧑‍💻 Pengguna Terbaru</h2>
-        <div v-if="loadingUsers" class="loading spinner-container"><div class="spinner"></div></div>
-        <div v-else class="users-list">
-          <div v-for="user in latestUsers" :key="user.id" class="user-item">
-            <div class="user-info">
-              <span class="user-name">{{ user.full_name }}</span>
-              <span class="user-email">{{ user.email }}</span>
+
+              <div class="app-description">
+                <p class="description">{{ app.description || 'Tidak ada deskripsi' }}</p>
+              </div>
             </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- <section class="dashboard-section">
+      <h2>🧑‍💻 Pengguna Terbaru</h2>
+      <div v-if="loadingUsers" class="loading spinner-container"><div class="spinner"></div></div>
+      <div v-else class="users-list">
+        <div v-for="user in latestUsers" :key="user.id" class="user-item">
+          <div class="user-info">
+            <span class="user-name">{{ user.full_name }}</span>
+            <span class="user-email">{{ user.email }}</span>
           </div>
         </div>
-      </section> -->
-    </div>
-  </template>
+      </div>
+    </section> -->
+  </div>
+</template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
@@ -606,7 +607,7 @@ onUnmounted(() => {
 }
 
 .code {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.9rem;
   margin-top: 0.2rem;
   font-family: monospace;
@@ -614,7 +615,7 @@ onUnmounted(() => {
 
 .description {
   margin-top: 0.5rem;
-  color: #555;
+  color: var(--text-color);
   font-size: 0.9rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;

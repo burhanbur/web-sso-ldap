@@ -60,7 +60,7 @@
         </div>
 
         <div class="user-mid">
-          <strong>Aplikasi: </strong>
+          <strong style="color: var(--text-primary)">Aplikasi: </strong>
           <div class="apps">
             <div v-if="user.app_access.length === 0"><small>Belum ada akses ke aplikasi klien</small></div>
             <span v-for="app in user.app_access" :key="app.id" class="app-badge">
@@ -1010,7 +1010,7 @@
 }
 
 .email {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.8rem;
   margin-top: 0.2rem;
 }
@@ -1020,6 +1020,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
+  color: var(--text-secondary);
 }
 
 .app-badge {
@@ -1038,7 +1039,7 @@
 
 .role-badge {
   background-color: #f0f0f0;
-  color: #333;
+  color: var(--text-primary);
   padding: 0.1rem 0.4rem;
   border-radius: 3px;
   font-size: 0.7rem;
@@ -1095,7 +1096,7 @@
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  background-color: #fafafa;
+  background-color: var(--bg-secondary);
 }
 
 .akses-grid {

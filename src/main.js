@@ -3,6 +3,8 @@ import { createPinia } from 'pinia';
 import App from './App.vue'
 import router from './router'
 import './assets/main.css'
+import './assets/css/dark-theme.css'
+import './assets/css/dashboard.css'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import './plugins/fontawesome'
 import { useThemeStore } from './stores/theme'
