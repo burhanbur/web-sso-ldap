@@ -319,6 +319,8 @@
     <ClientCredentialsModal
       v-if="showCredentialsModal"
       :appId="selectedApp?.uuid"
+      :clientId="selectedApp?.client_id"
+      :clientSecret="selectedApp?.client_secret"
       @close="showCredentialsModal = false"
     />
   </div>

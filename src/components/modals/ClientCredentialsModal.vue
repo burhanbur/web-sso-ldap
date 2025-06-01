@@ -14,14 +14,48 @@
             <label>App ID</label>
             <div class="credential-input">
               <input 
-                :type="showClientId ? 'text' : 'password'" 
+                :type="showAppId ? 'text' : 'password'" 
                 :value="appId" 
+                readonly
+              />
+              <button @click="showAppId = !showAppId" class="toggle-visibility" type="button">
+                <font-awesome-icon :icon="showAppId ? 'eye-slash' : 'eye'" />
+              </button>
+              <button @click="copyToClipboard(appId)" class="copy-button" type="button">
+                <font-awesome-icon icon="copy" />
+              </button>
+            </div>
+          </div>
+
+          <div class="credential-group">
+            <label>Client ID</label>
+            <div class="credential-input">
+              <input 
+                :type="showClientId ? 'text' : 'password'" 
+                :value="clientId" 
                 readonly
               />
               <button @click="showClientId = !showClientId" class="toggle-visibility" type="button">
                 <font-awesome-icon :icon="showClientId ? 'eye-slash' : 'eye'" />
               </button>
-              <button @click="copyToClipboard(appId)" class="copy-button" type="button">
+              <button @click="copyToClipboard(clientId)" class="copy-button" type="button">
+                <font-awesome-icon icon="copy" />
+              </button>
+            </div>
+          </div>
+
+          <div class="credential-group">
+            <label>Client Secret</label>
+            <div class="credential-input">
+              <input 
+                :type="showClientSecret ? 'text' : 'password'" 
+                :value="clientSecret" 
+                readonly
+              />
+              <button @click="showClientSecret = !showClientSecret" class="toggle-visibility" type="button">
+                <font-awesome-icon :icon="showClientSecret ? 'eye-slash' : 'eye'" />
+              </button>
+              <button @click="copyToClipboard(clientSecret)" class="copy-button" type="button">
                 <font-awesome-icon icon="copy" />
               </button>
             </div>
@@ -45,9 +79,19 @@ const props = defineProps({
     type: String,
     required: true
   },
+  clientId: {
+    type: String,
+    required: true
+  },
+  clientSecret: {
+    type: String,
+    required: true
+  },
 });
 
+const showAppId = ref(false);
 const showClientId = ref(false);
+const showClientSecret = ref(false);
 
 const copyToClipboard = async (text) => {
   try {
