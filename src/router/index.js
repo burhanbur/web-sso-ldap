@@ -97,44 +97,36 @@ router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
     const isGuestRoute = to.matched.some(record => record.meta.requiresGuest);
     
-    // Jika bukan guest route dan user belum dimuat, coba muat data user
     if (!isGuestRoute && !authStore.isUserLoaded) {
         try {
             await authStore.fetchUserData();
         } catch (error) {
-            // Jika error, anggap tidak terautentikasi
             console.log('Failed to fetch user data:', error);
         }
     }
 
     const isAuthenticated = authStore.isAuthenticated;
 
-    // Handle routes that require authentication
     if (to.matched.some(record => record.meta.requiresAuth)) {
         if (!isAuthenticated) {
             return next('/login');
         }
 
-        let isAdmin = authStore.isAdmin;
-
-        if (to.matched.some(record => record.meta.requiresAdmin) && !isAdmin) {
-            next('/dashboard');
-        } else {
-            next();
+        if (to.matched.some(record => record.meta.requiresAdmin) && !authStore.isAdmin) {
+            return next('/dashboard');
         }
+        
+        return next();
     } 
-    // Handle guest-only routes
-    else if (to.matched.some(record => record.meta.requiresGuest)) {
-        if (isAuthenticated) {
-            next('/dashboard');
-        } else {
-            next();
+    
+    if (to.matched.some(record => record.meta.requiresGuest)) {
+        if (isAuthenticated || authStore.isUserLoaded) {
+            return next('/dashboard');
         }
+        return next();
     }
-    // For routes with no restrictions
-    else {
-        next();
-    }
+    
+    return next();
 });
 
 export default router;

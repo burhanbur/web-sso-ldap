@@ -29,7 +29,7 @@ export const useAuthStore = defineStore('auth', {
       
       return ssoApp.roles.some(role => role.code === 'admin');
     },
-    fullName: (state) => state.user?.full_name || '',
+    fullName: (state) => state.user?.full_name || 'Pengguna',
     email: (state) => state.user?.email || '',
     roles: (state) => {
       if (!state.user || !state.user.app_access) return [];

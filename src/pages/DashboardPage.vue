@@ -3,7 +3,7 @@
     <header class="dashboard-header">
       <div class="header-content">
         <div class="header-title">
-          <h2 class="dashboard-welcome">📊 Selamat datang di Central Authentication Universitas Pertamina</h2>
+          <h2 class="dashboard-welcome">📊 Selamat datang di Layanan Autentikasi Terpusat Universitas Pertamina</h2>
         </div>          
         <div class="header-actions">
           <div class="notification-wrapper">
