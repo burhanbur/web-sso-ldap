@@ -91,6 +91,9 @@
             <button @click="editUser(user)" class="action-btn edit">
               <font-awesome-icon icon="edit" />
             </button>
+            <button @click="deleteUser(user)" class="action-btn delete">
+              <font-awesome-icon icon="trash" />
+            </button>
           </div>
         </div>
       </div>
@@ -625,6 +628,48 @@
         errorToast(message);
       } finally {
         loading.value = false;
+      }
+    }
+
+    const deleteUser = async (user) => {
+      const initialResult = await Swal.fire({
+        title: 'Konfirmasi',
+        text: `Anda akan menghapus pengguna ini?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+      });
+
+      if (initialResult.isConfirmed) {
+        const usernameResult = await Swal.fire({
+          title: 'Konfirmasi Penghapusan',
+          html: `Untuk mengonfirmasi penghapusan, ketik "<b style="color: red">${user.username}</b>"`,
+          input: 'text',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: 'Hapus',
+          cancelButtonText: 'Batal',
+          inputValidator: (value) => {
+            if (value !== user.username) {
+              return 'Username yang dimasukkan tidak sesuai!';
+            }
+          }
+        });
+
+        if (usernameResult.isConfirmed) {
+          try {
+            const response = await userService.deleteUser(user.uuid);
+            await fetchUsers();
+            successToast(response.data.message)
+          } catch (error) {
+            errorToast(error.response.data.message);
+          }
+        }
       }
     }
 

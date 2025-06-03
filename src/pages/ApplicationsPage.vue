@@ -498,9 +498,12 @@
     }
 
     const deleteApplication = async (uuid) => {
-      const result = await Swal.fire({
+      const app = applications.value.find(a => a.uuid === uuid);
+      if (!app) return;
+
+      const initialResult = await Swal.fire({
         title: 'Konfirmasi',
-        text: `Apakah yakin ingin menghapus data ini?`,
+        text: `Apakah yakin ingin menghapus aplikasi ini?`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
@@ -509,13 +512,32 @@
         cancelButtonText: 'Batal'
       });
 
-      if (result.isConfirmed) {
-        try {          
-          const response = await applicationService.deleteApplication(uuid);
-          await fetchApplications();
-          successToast(response.data.message)
-        } catch (error) {
-          errorToast(error.response.data.message);
+      if (initialResult.isConfirmed) {
+        const codeResult = await Swal.fire({
+          title: 'Konfirmasi Penghapusan',
+          html: `Untuk mengonfirmasi penghapusan, ketik kode aplikasi "<b style="color: red">${app.code}</b>"`,
+          input: 'text',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: 'Hapus',
+          cancelButtonText: 'Batal',
+          inputValidator: (value) => {
+            if (value !== app.code) {
+              return 'Kode aplikasi yang dimasukkan tidak sesuai!';
+            }
+          }
+        });
+
+        if (codeResult.isConfirmed) {
+          try {          
+            const response = await applicationService.deleteApplication(uuid);
+            await fetchApplications();
+            successToast(response.data.message)
+          } catch (error) {
+            errorToast(error.response.data.message);
+          }
         }
       }
     }
