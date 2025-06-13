@@ -318,8 +318,7 @@
 
     if (result.isConfirmed) {
       try {
-        const response = await authService.changeUserPassword(
-          formDataChangePassword.username, 
+        const response = await authService.changeMyPassword(
           formDataChangePassword.password, 
           formDataChangePassword.password_confirmation
         );

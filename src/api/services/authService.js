@@ -25,7 +25,7 @@ export const authService = {
             password_confirmation
         });
     },
-    changeMyPassword: (username, password, password_confirmation) => {
+    changeMyPassword: (password, password_confirmation) => {
         return api.post('/auth/me/password/change', {
             password,
             password,
