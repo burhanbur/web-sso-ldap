@@ -25,11 +25,11 @@ export const authService = {
             password_confirmation
         });
     },
-    changeMyPassword: (password, password_confirmation) => {
+    changeMyPassword: (current_password, new_password, new_password_confirmation) => {
         return api.post('/auth/me/password/change', {
-            password,
-            password,
-            password_confirmation
+            current_password,
+            new_password,
+            new_password_confirmation
         });
     },
     updateMyProfile: (user) => {

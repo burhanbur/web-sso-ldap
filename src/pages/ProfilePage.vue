@@ -117,37 +117,57 @@
         <form @submit.prevent="handleChangePassword" class="modal-form">
           <div class="modal-body">
             <div class="form-group password-group">
-              <label for="password">Password Baru</label>
+              <label for="password">Password Lama</label>
               <input 
-                :type="showPassword ? 'text' : 'password'" 
-                id="password" 
-                placeholder="Password baru pengguna" 
-                v-model="formDataChangePassword.password" required 
+                :type="showCurrentPassword ? 'text' : 'password'" 
+                id="current_password" 
+                placeholder="Password lama pengguna" 
+                v-model="formDataChangePassword.current_password" required 
               />
               <button 
                 type="button"
                 class="toggle-password" 
-                @click="showPassword = !showPassword"
-                :title="showPassword ? 'Hide password' : 'Show password'"
+                @click="showCurrentPassword = !showCurrentPassword"
+                :title="showCurrentPassword ? 'Hide password' : 'Show password'"
               >
-                <font-awesome-icon :icon="showPassword ? 'eye-slash' : 'eye'" />
+                <font-awesome-icon :icon="showCurrentPassword ? 'eye-slash' : 'eye'" />
+              </button>
+            </div>
+
+            <hr class="modal-divider">
+
+            <div class="form-group password-group">
+              <label for="password">Password Baru</label>
+              <input 
+                :type="showNewPassword ? 'text' : 'password'" 
+                id="new_password" 
+                placeholder="Password baru pengguna" 
+                v-model="formDataChangePassword.new_password" required 
+              />
+              <button 
+                type="button"
+                class="toggle-password" 
+                @click="showNewPassword = !showNewPassword"
+                :title="showNewPassword ? 'Hide password' : 'Show password'"
+              >
+                <font-awesome-icon :icon="showNewPassword ? 'eye-slash' : 'eye'" />
               </button>
             </div>
             <div class="form-group password-group">
-              <label for="password_confirmation">Konfirmasi Password</label>
+              <label for="password_confirmation">Konfirmasi Password Baru</label>
               <input 
-                :type="showPasswordConfirmation ? 'text' : 'password'" 
-                id="password_confirmation" 
+                :type="showNewPasswordConfirmation ? 'text' : 'password'" 
+                id="new_password_confirmation" 
                 placeholder="Konfirmasi password baru pengguna" 
-                v-model="formDataChangePassword.password_confirmation" required 
+                v-model="formDataChangePassword.new_password_confirmation" required 
               />
               <button 
                 type="button"
                 class="toggle-password"
-                @click="showPasswordConfirmation = !showPasswordConfirmation"
-                :title="showPasswordConfirmation ? 'Hide password' : 'Show password'"
+                @click="showNewPasswordConfirmation = !showNewPasswordConfirmation"
+                :title="showNewPasswordConfirmation ? 'Hide password' : 'Show password'"
               >
-                <font-awesome-icon :icon="showPasswordConfirmation ? 'eye-slash' : 'eye'" />
+                <font-awesome-icon :icon="showNewPasswordConfirmation ? 'eye-slash' : 'eye'" />
               </button>
             </div>
           </div>
@@ -223,8 +243,9 @@
   const showEditModal = ref(false);
 
   const showChangePasswordModal = ref(false);
-  const showPassword = ref(false);
-  const showPasswordConfirmation = ref(false);
+  const showCurrentPassword = ref(false);
+  const showNewPassword = ref(false);
+  const showNewPasswordConfirmation = ref(false);
   const user = ref({
     code: '',
     username: '',
@@ -245,8 +266,9 @@
   })
 
   let formDataChangePassword = reactive({
-    password: '',
-    password_confirmation: ''
+    current_password: '',
+    new_password: '',
+    new_password_confirmation: ''
   })
 
   const loadUserData = (user) => {
@@ -298,9 +320,9 @@
   const changePassword = (user) => {
     showChangePasswordModal.value = true;
     formDataChangePassword = {
-      username: user.username,
-      password: '',
-      password_confirmation: ''
+      current_password: '',
+      new_password: '',
+      new_password_confirmation: ''
     }
   }
 
@@ -319,8 +341,9 @@
     if (result.isConfirmed) {
       try {
         const response = await authService.changeMyPassword(
-          formDataChangePassword.password, 
-          formDataChangePassword.password_confirmation
+          formDataChangePassword.current_password, 
+          formDataChangePassword.new_password, 
+          formDataChangePassword.new_password_confirmation
         );
         
         successToast(response.data?.message);
